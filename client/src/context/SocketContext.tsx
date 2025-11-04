@@ -59,10 +59,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     const socketUrl = getSocketURL()
 
-    console.log('Creating socket connection to:', socketUrl)
-    console.log('User token:', user.token ? 'Present' : 'Missing')
-    console.log('User ID:', user.id)
-
     const newSocket = io(socketUrl, {
       path: '/socket.io/',
       auth: {
@@ -81,22 +77,18 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on('connect', () => {
       setIsConnected(true)
       setConnectionError(null)
-      console.log('Socket connected successfully')
     })
 
-    newSocket.on('disconnect', (reason) => {
+    newSocket.on('disconnect', (_reason) => {
       setIsConnected(false)
-      console.log('Socket disconnected:', reason)
     })
 
     newSocket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error)
       setIsConnected(false)
       setConnectionError(error.message || 'Connection failed')
     })
 
     newSocket.on('error', (error) => {
-      console.error('Socket error:', error)
       setConnectionError(error.message || 'Socket error')
     })
 
@@ -106,7 +98,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }, 0)
 
     return () => {
-      console.log('Cleaning up socket connection')
       newSocket.close()
       setSocket(null)
       setIsConnected(false)
@@ -134,7 +125,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   const reconnect = () => {
     if (socket) {
-      console.log('Manually reconnecting socket...')
       socket.connect()
     }
   }
