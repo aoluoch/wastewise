@@ -1,6 +1,7 @@
 export * from './user'
 export * from './report'
 export * from './pickup'
+export * from './notification'
 
 // Type aliases for compatibility
 export type { WasteReport as Report } from './report'

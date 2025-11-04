@@ -356,4 +356,97 @@ export const pickupApi = {
     const response = await axiosInstance.get<ApiResponse<PerformanceMetrics>>(`/pickups/collector/performance?period=${period}`)
     return response.data.data
   },
+
+  // Get resident's pickup schedule (tasks for their reports)
+  async getResidentPickups(page = 1, limit = 20): Promise<PaginatedResponse<PickupTask>> {
+    try {
+      const response = await axiosInstance.get<ApiResponse<TasksResponse>>(
+        `/pickups/tasks?page=${page}&limit=${limit}`
+      )
+      
+      const responseData = response.data.data
+      const rawTasks: unknown[] = Array.isArray(responseData.pickupTasks)
+        ? (responseData.pickupTasks as unknown[])
+        : []
+
+      const normalizedTasks = rawTasks.map((raw: unknown) => {
+        const t = (raw || {}) as Record<string, unknown>
+        const id = (typeof t.id === 'string' ? t.id : undefined) || (typeof t._id === 'string' ? t._id : undefined)
+
+        const reportFromT = (t.report as Record<string, unknown> | undefined) || (t.reportId as Record<string, unknown> | undefined) || {}
+        const reportIdRaw = t.reportId
+        let reportId: string | undefined
+        if (typeof reportIdRaw === 'string') {
+          reportId = reportIdRaw
+        } else if (reportIdRaw && typeof reportIdRaw === 'object' && '_id' in reportIdRaw) {
+          const maybe = reportIdRaw as { _id?: unknown }
+          reportId = typeof maybe._id === 'string' ? maybe._id : undefined
+        } else if (reportFromT && typeof reportFromT === 'object' && 'id' in reportFromT) {
+          reportId = typeof (reportFromT as { id?: unknown }).id === 'string' ? (reportFromT as { id?: string }).id : undefined
+        } else if (reportFromT && typeof reportFromT === 'object' && '_id' in reportFromT) {
+          reportId = typeof (reportFromT as { _id?: unknown })._id === 'string' ? (reportFromT as { _id?: string })._id : undefined
+        }
+
+        const collectorIdRaw = t.collectorId
+        let collectorId: string | undefined
+        if (typeof collectorIdRaw === 'string') {
+          collectorId = collectorIdRaw
+        } else if (collectorIdRaw && typeof collectorIdRaw === 'object' && '_id' in collectorIdRaw) {
+          const maybe = collectorIdRaw as { _id?: unknown }
+          collectorId = typeof maybe._id === 'string' ? maybe._id : undefined
+        }
+
+        const report = reportFromT as Record<string, unknown>
+
+        const normalized: PickupTask = {
+          id: id ?? '',
+          reportId: reportId ?? '',
+          collectorId: collectorId ?? '',
+          status: (typeof t.status === 'string' ? (t.status as PickupTask['status']) : 'scheduled'),
+          scheduledDate: (typeof t.scheduledDate === 'string' ? (t.scheduledDate as string) : ''),
+          estimatedDuration: (typeof t.estimatedDuration === 'number' ? t.estimatedDuration : 0),
+          actualStartTime: typeof t.actualStartTime === 'string' ? (t.actualStartTime as string) : undefined,
+          actualEndTime: typeof t.actualEndTime === 'string' ? (t.actualEndTime as string) : undefined,
+          notes: typeof t.notes === 'string' ? (t.notes as string) : undefined,
+          completionNotes: typeof t.completionNotes === 'string' ? (t.completionNotes as string) : undefined,
+          images: Array.isArray(t.images) ? (t.images as string[]) : [],
+          createdAt: typeof t.createdAt === 'string' ? (t.createdAt as string) : '',
+          updatedAt: typeof t.updatedAt === 'string' ? (t.updatedAt as string) : '',
+          report: {
+            id: (typeof report.id === 'string' ? (report.id as string) : (typeof report._id === 'string' ? (report._id as string) : '')),
+            type: typeof report.type === 'string' ? (report.type as string) : '',
+            description: typeof report.description === 'string' ? (report.description as string) : '',
+            location: (report.location as unknown as PickupTask['report']['location']) || {
+              address: '',
+              coordinates: { lat: 0, lng: 0 },
+            },
+            priority: typeof report.priority === 'string' ? (report.priority as string) : 'medium',
+            estimatedVolume: typeof report.estimatedVolume === 'number' ? (report.estimatedVolume as number) : 0,
+          },
+        }
+
+        return normalized
+      })
+
+      return {
+        data: normalizedTasks,
+        pagination: responseData.pagination || {
+          page: page,
+          limit: limit,
+          total: 0,
+          totalPages: 0
+        }
+      }
+    } catch {
+      return {
+        data: [],
+        pagination: {
+          page: page,
+          limit: limit,
+          total: 0,
+          totalPages: 0
+        }
+      }
+    }
+  },
 }
