@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notificationApi } from '../../api/notificationApi'
 import { Notification, NotificationFilters } from '../../types'
@@ -11,7 +11,7 @@ const Notifications: React.FC = () => {
   const limit = 20
 
   // Fetch notifications
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['notifications', filters, page],
     queryFn: () => notificationApi.getNotifications(filters, page, limit),
     refetchInterval: 30000, // Refetch every 30 seconds
