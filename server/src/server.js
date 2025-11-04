@@ -29,7 +29,7 @@ const server = createServer(app);
 
 // Socket.io setup
 const socketAllowedOrigins = process.env.NODE_ENV === 'production'
-  ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean)
+  ? (process.env.SOCKET_CORS_ORIGIN || process.env.FRONTEND_URL || '').split(',').map(url => url.trim().replace(/\/$/, '')).filter(Boolean)
   : ['http://localhost:3000', 'http://localhost:5173'];
 
 const io = new Server(server, {
@@ -62,8 +62,8 @@ if (process.env.NODE_ENV === 'production') {
 
 // CORS configuration
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean)
-  : ['https://wasteweb.netlify.app/'];
+  ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim().replace(/\/$/, '')).filter(Boolean)
+  : ['http://localhost:3000', 'http://localhost:5173'];
 
 app.use(cors({
   origin: function (origin, callback) {
