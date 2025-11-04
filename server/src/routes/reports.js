@@ -592,6 +592,15 @@ router.delete('/:id', [
       console.log('Verification: Report successfully deleted from database');
     }
 
+    // Emit socket event for real-time updates
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('report_deleted', {
+        reportId: req.params.id,
+        userId: report.userId
+      });
+    }
+
     res.json({
       success: true,
       message: 'Report deleted successfully'

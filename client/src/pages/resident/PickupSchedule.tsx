@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { pickupApi } from '../../api/pickupApi'
 import { PickupTask } from '../../types'
 import { Link } from 'react-router-dom'
 import Button from '../../components/Button'
+import { useSocket } from '../../hooks/useSocket'
 
 const PickupSchedule: React.FC = () => {
+  const queryClient = useQueryClient()
+  const { socket, isConnected } = useSocket()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const limit = 10
@@ -16,6 +19,29 @@ const PickupSchedule: React.FC = () => {
     queryFn: () => pickupApi.getResidentPickups(page, limit),
     refetchInterval: 30000, // Refetch every 30 seconds
   })
+
+  // Real-time updates via Socket.IO
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    const handleTaskUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['resident-pickups'] })
+    }
+
+    const handleAssignTask = () => {
+      queryClient.invalidateQueries({ queryKey: ['resident-pickups'] })
+    }
+
+    socket.on('task_update', handleTaskUpdate)
+    socket.on('assign_task', handleAssignTask)
+    socket.on('task_reassigned', handleTaskUpdate)
+
+    return () => {
+      socket.off('task_update', handleTaskUpdate)
+      socket.off('assign_task', handleAssignTask)
+      socket.off('task_reassigned', handleTaskUpdate)
+    }
+  }, [socket, isConnected, queryClient])
 
   const getStatusColor = (status: string) => {
     switch (status) {

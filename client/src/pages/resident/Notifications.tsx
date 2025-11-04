@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notificationApi } from '../../api/notificationApi'
 import { Notification, NotificationFilters } from '../../types'
 import Button from '../../components/Button'
+import { useSocket } from '../../hooks/useSocket'
 
 const Notifications: React.FC = () => {
   const queryClient = useQueryClient()
+  const { socket, isConnected } = useSocket()
   const [filters, setFilters] = useState<NotificationFilters>({})
   const [page, setPage] = useState(1)
   const limit = 20
@@ -16,6 +18,21 @@ const Notifications: React.FC = () => {
     queryFn: () => notificationApi.getNotifications(filters, page, limit),
     refetchInterval: 30000, // Refetch every 30 seconds
   })
+
+  // Real-time updates via Socket.IO
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    const handleNewNotification = () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    }
+
+    socket.on('new_notification', handleNewNotification)
+
+    return () => {
+      socket.off('new_notification', handleNewNotification)
+    }
+  }, [socket, isConnected, queryClient])
 
   // Mark as read mutation
   const markAsReadMutation = useMutation({

@@ -1,12 +1,15 @@
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../hooks/useAuth'
 import Button from '../../components/Button'
 import { Link } from 'react-router-dom'
 import { statisticsApi } from '../../api/statisticsApi'
+import { useSocket } from '../../hooks/useSocket'
 
 const ResidentDashboard: React.FC = () => {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const { socket, isConnected } = useSocket()
   
   // Fetch resident statistics
   const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
@@ -14,6 +17,44 @@ const ResidentDashboard: React.FC = () => {
     queryFn: statisticsApi.getResidentStats,
     refetchInterval: 30000, // Refetch every 30 seconds
   })
+
+  // Real-time updates via Socket.IO
+  useEffect(() => {
+    if (!socket || !isConnected) return
+
+    // Listen for new reports
+    const handleNewReport = () => {
+      queryClient.invalidateQueries({ queryKey: ['statistics', 'resident'] })
+    }
+
+    // Listen for report updates
+    const handleReportUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['statistics', 'resident'] })
+    }
+
+    // Listen for report deletions
+    const handleReportDeleted = () => {
+      queryClient.invalidateQueries({ queryKey: ['statistics', 'resident'] })
+    }
+
+    // Listen for task updates (affects pickup schedules)
+    const handleTaskUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['statistics', 'resident'] })
+    }
+
+    socket.on('new_report', handleNewReport)
+    socket.on('task_update', handleReportUpdate)
+    socket.on('report_deleted', handleReportDeleted)
+    socket.on('assign_task', handleTaskUpdate)
+
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off('new_report', handleNewReport)
+      socket.off('task_update', handleReportUpdate)
+      socket.off('report_deleted', handleReportDeleted)
+      socket.off('assign_task', handleTaskUpdate)
+    }
+  }, [socket, isConnected, queryClient])
 
   return (
     <div className="space-y-6 font-['Poppins']">
