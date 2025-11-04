@@ -153,8 +153,8 @@ npm run type-check   # TypeScript type checking
 # Make sure MongoDB is running
 mongod
 
-# Or use MongoDB Atlas connection string
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/wastewise
+# Or use MongoDB Atlas connection string (replace with your actual credentials)
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/wastewise
 ```
 
 ### Port Already in Use
