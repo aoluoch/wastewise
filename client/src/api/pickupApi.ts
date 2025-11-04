@@ -298,10 +298,7 @@ export const pickupApi = {
           totalPages: 0
         }
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      const errorResponse = (error as { response?: { data?: unknown } })?.response?.data
-      console.error('Error fetching my tasks:', errorResponse || errorMessage)
+    } catch {
       // Return empty result instead of throwing to prevent crashes
       return {
         data: [],
@@ -329,10 +326,7 @@ export const pickupApi = {
       const cacheBuster = Date.now()
       const response = await axiosInstance.get<ApiResponse<CollectorStats>>(`/pickups/collector/stats?_=${cacheBuster}`)
       return response.data.data
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      const errorResponse = (error as { response?: { data?: unknown } })?.response?.data
-      console.error('Error fetching collector stats:', errorResponse || errorMessage)
+    } catch {
       // Return default stats instead of throwing to prevent crashes
       return {
         total: 0,

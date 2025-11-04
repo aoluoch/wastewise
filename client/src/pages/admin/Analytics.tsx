@@ -40,8 +40,7 @@ const AdminAnalytics: React.FC = () => {
       ])
       setReportAnalytics(reportData)
       setUserAnalytics(userData)
-    } catch (error) {
-      console.error('Failed to fetch analytics:', error)
+    } catch {
       showToast({ message: 'Failed to load analytics data', type: 'error' })
     } finally {
       setLoading(false)

@@ -23,8 +23,7 @@ const AdminUsers: React.FC = () => {
       const data = await adminApi.getUsers(filters)
       setUsers(data.users)
       setPagination(data.pagination)
-    } catch (error) {
-      console.error('Failed to fetch users:', error)
+    } catch {
       showToast({ message: 'Failed to load users', type: 'error' })
     } finally {
       setLoading(false)
@@ -40,8 +39,7 @@ const AdminUsers: React.FC = () => {
       await adminApi.updateUserStatus(user._id, !user.isActive)
       showToast({ message: `User ${!user.isActive ? 'activated' : 'deactivated'} successfully`, type: 'success' })
       fetchUsers()
-    } catch (error) {
-      console.error('Failed to update user status:', error)
+    } catch {
       showToast({ message: 'Failed to update user status', type: 'error' })
     }
   }
@@ -58,8 +56,7 @@ const AdminUsers: React.FC = () => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       showToast({ message: `Users exported as ${format.toUpperCase()} successfully`, type: 'success' })
-    } catch (error) {
-      console.error('Failed to export users:', error)
+    } catch {
       showToast({ message: 'Failed to export users', type: 'error' })
     }
   }

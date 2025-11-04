@@ -30,14 +30,16 @@ const DirectChat: React.FC = () => {
     if (!userId) return
     userApi.getUser(userId)
       .then((u: User) => setPeer({ id: userId, name: `${u.firstName} ${u.lastName}` }))
-      .catch((err) => { console.error(err); setPeer({ id: userId, name: 'Collector' }) })
+      .catch(() => { setPeer({ id: userId, name: 'Collector' }) })
   }, [userId])
 
   useEffect(() => {
     if (!socket || !room) return
 
     socket.emit('join_room', room)
-    messagesApi.getRoomMessages(room, 1, 50).then(setMessages).catch((err) => console.error(err))
+    messagesApi.getRoomMessages(room, 1, 50).then(setMessages).catch(() => {
+      // Ignore errors loading messages
+    })
 
     type Incoming = {
       room: string

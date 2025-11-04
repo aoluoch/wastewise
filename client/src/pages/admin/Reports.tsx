@@ -25,8 +25,7 @@ const AdminReports: React.FC = () => {
       const data = await adminApi.getReports(filters)
       setReports(data.reports)
       setPagination(data.pagination)
-    } catch (error) {
-      console.error('Failed to fetch reports:', error)
+    } catch {
       showToast({ message: 'Failed to load reports', type: 'error' })
     } finally {
       setLoading(false)
@@ -51,8 +50,7 @@ const AdminReports: React.FC = () => {
       setStatusUpdate({ status: '', notes: '' })
       setSelectedReport(null)
       fetchReports()
-    } catch (error) {
-      console.error('Failed to update report status:', error)
+    } catch {
       showToast({ message: 'Failed to update report status', type: 'error' })
     }
   }
@@ -69,8 +67,7 @@ const AdminReports: React.FC = () => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
       showToast({ message: `Reports exported as ${format.toUpperCase()} successfully`, type: 'success' })
-    } catch (error) {
-      console.error('Failed to export reports:', error)
+    } catch {
       showToast({ message: 'Failed to export reports', type: 'error' })
     }
   }

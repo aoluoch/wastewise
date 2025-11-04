@@ -156,8 +156,6 @@ const CollectorDashboard: React.FC = () => {
     setRefreshing(true)
     try {
       await Promise.all([refetchTasks(), refetchStats()])
-    } catch (error) {
-      console.error('Failed to refresh data:', error)
     } finally {
       setRefreshing(false)
     }
@@ -194,21 +192,13 @@ const CollectorDashboard: React.FC = () => {
   }
 
   const handleStartTask = async (taskId: string) => {
-    try {
-      await startTaskMutation.mutate(taskId)
-    } catch (error) {
-      console.error('Failed to start task:', error)
-    }
+    await startTaskMutation.mutate(taskId)
   }
 
   const handleCompleteTask = async (taskId: string) => {
     const notes = window.prompt('Add completion notes (optional):')
     if (notes !== null) { // Only proceed if user didn't cancel
-    try {
       await completeTaskMutation.mutate({ taskId, notes: notes || undefined })
-    } catch (error) {
-      console.error('Failed to complete task:', error)
-      }
     }
   }
 

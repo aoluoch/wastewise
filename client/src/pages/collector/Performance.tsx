@@ -41,8 +41,7 @@ const Performance: React.FC = () => {
       setError(null)
       const data = await pickupApi.getCollectorPerformance(selectedPeriod)
       setMetrics(data)
-    } catch (err) {
-      console.error('Error fetching performance data:', err)
+    } catch {
       setError('Failed to load performance data. Please try again.')
     } finally {
       setLoading(false)

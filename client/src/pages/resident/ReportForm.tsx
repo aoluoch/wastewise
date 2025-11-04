@@ -24,8 +24,8 @@ const ReportForm: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<string>('')
 
   const { selectedLocation, handleMapClick, getCurrentLocation, setSelectedLocation } = useMap({
-    onLocationChange: (coordinates) => {
-      console.log('Location selected:', coordinates.lat, coordinates.lng)
+    onLocationChange: () => {
+      // Location change handled
     },
   })
 
@@ -111,12 +111,6 @@ const ReportForm: React.FC = () => {
     try {
       setIsLoading(true)
       
-      // Debug logging
-      console.log('Form data:', formData)
-      console.log('Selected location:', selectedLocation)
-      console.log('Selected address:', selectedAddress)
-      console.log('Images count:', images.length)
-      
       // Create FormData for multipart/form-data request
       const formDataToSend = new FormData()
       formDataToSend.append('type', formData.type)
@@ -143,24 +137,15 @@ const ReportForm: React.FC = () => {
         formDataToSend.append('images', image)
       })
       
-      // Debug FormData contents
-      console.log('FormData contents:')
-      for (const [key, value] of formDataToSend.entries()) {
-        console.log(key, value)
-      }
-      
       // Call the API
       await reportsApi.create(formDataToSend)
       
       showToast({ message: 'Waste report submitted successfully!', type: 'success' })
       navigate('/resident/dashboard')
     } catch (error: unknown) {
-      console.error('Error creating report:', error)
-      
       // Handle validation errors from the server
       if (error && typeof error === 'object' && 'errors' in error) {
         const validationError = error as { message: string; errors?: Record<string, string[]>; reasons?: string[] }
-        console.error('Validation errors:', validationError.errors)
         
         // Check if this is an AI image rejection
         if (validationError.message?.includes('do not appear to depict waste') || validationError.reasons) {

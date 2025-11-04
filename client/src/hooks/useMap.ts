@@ -60,8 +60,7 @@ export function useMap(options: UseMapOptions = {}): UseMapReturn {
           handleLocationSelection(coordinates)
           resolve(coordinates)
         },
-        (error) => {
-          console.error('Error getting current location:', error)
+        () => {
           resolve(null)
         },
         {

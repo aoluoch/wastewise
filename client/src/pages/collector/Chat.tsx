@@ -61,7 +61,9 @@ const CollectorChat: React.FC = () => {
             return [...existingSystem, ...history]
           })
         })
-        .catch((err) => console.error(err))
+        .catch(() => {
+          // Ignore errors loading messages
+        })
 
       // Listen for messages
       const handleNewMessage = (...args: unknown[]) => {

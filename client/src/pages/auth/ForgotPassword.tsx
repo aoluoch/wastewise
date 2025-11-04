@@ -34,7 +34,6 @@ const ForgotPassword: React.FC = () => {
       await authApi.forgotPassword(email)
       setIsSubmitted(true)
     } catch (error: unknown) {
-      console.error('Forgot password error:', error)
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
         : undefined

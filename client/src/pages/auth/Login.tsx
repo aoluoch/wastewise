@@ -51,8 +51,7 @@ const Login: React.FC = () => {
       setIsLoading(true)
       await login(formData)
       navigate(from, { replace: true })
-    } catch (error) {
-      console.error('Login error:', error)
+    } catch {
       // Error is handled by the auth context
     } finally {
       setIsLoading(false)

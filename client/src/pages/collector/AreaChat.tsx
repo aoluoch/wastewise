@@ -32,7 +32,9 @@ const AreaChat: React.FC = () => {
   useEffect(() => {
     if (!socket || !areaRoom) return
     socket.emit('join_room', areaRoom)
-    messagesApi.getRoomMessages(areaRoom, 1, 50).then(setMessages).catch((err) => console.error(err))
+    messagesApi.getRoomMessages(areaRoom, 1, 50).then(setMessages).catch(() => {
+      // Ignore errors loading messages
+    })
     type Incoming = {
       room: string
       id: string

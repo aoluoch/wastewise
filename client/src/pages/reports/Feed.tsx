@@ -30,42 +30,25 @@ const Feed: React.FC = () => {
 	const { data: reports = [], isLoading, error } = useQuery({ 
 		queryKey: ['reports','feed'], 
 		queryFn: async () => {
-			console.log('Fetching reports feed...')
-			try {
-				const result = await reportsApi.getFeed()
-				console.log('Feed result:', result)
-				console.log('Number of reports received:', result.length)
-				return result
-			} catch (err) {
-				console.error('Feed API error:', err)
-				throw err
-			}
+			return await reportsApi.getFeed()
 		},
 		refetchOnWindowFocus: false,
 		staleTime: 0 // Always consider data stale to ensure fresh data
 	})
 	const deleteMutation = useMutation({
 		mutationFn: async (id: string) => {
-			console.log('Attempting to delete report:', id)
-			const result = await reportsApi.delete(id)
-			console.log('Delete API response:', result)
-			return result
+			return await reportsApi.delete(id)
 		},
-		onSuccess: (_, id) => {
-			console.log('Report deleted successfully:', id, 'Invalidating queries...')
+		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ['reports','feed'] })
 			// Also try to refetch immediately
 			qc.refetchQueries({ queryKey: ['reports','feed'] })
-		},
-		onError: (error) => {
-			console.error('Error deleting report:', error)
 		}
 	})
 
 	if (isLoading) return <div>Loading feed...</div>
 	
 	if (error) {
-		console.error('Feed error:', error)
 		return <div>Error loading feed: {error.message}</div>
 	}
 

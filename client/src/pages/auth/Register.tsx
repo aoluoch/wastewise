@@ -146,7 +146,6 @@ const Register: React.FC = () => {
       await register(registrationData)
       navigate('/resident/dashboard')
     } catch (error) {
-      console.error('Registration error:', error)
       const anyErr = error as { errors?: Record<string, string[]> }
       // Map server-side validation errors to form fields
       if (anyErr && anyErr.errors && typeof anyErr.errors === 'object') {

@@ -81,8 +81,7 @@ const TaskAssignment: React.FC = () => {
       const data = await response.json()
       setReports(data.data.reports)
       setTotalPages(data.data.pagination.totalPages)
-    } catch (error) {
-      console.error('Error fetching pending reports:', error)
+    } catch {
       showToast({
         type: 'error',
         title: 'Error',
@@ -108,8 +107,7 @@ const TaskAssignment: React.FC = () => {
 
       const data = await response.json()
       setCollectors(data.data)
-    } catch (error) {
-      console.error('Error fetching collectors:', error)
+    } catch {
       showToast({
         type: 'error',
         title: 'Error',
@@ -181,7 +179,6 @@ const TaskAssignment: React.FC = () => {
       setSelectedReport(null)
       fetchPendingReports() // Refresh the list
     } catch (error) {
-      console.error('Error assigning collector:', error)
       showToast({
         type: 'error',
         title: 'Error',

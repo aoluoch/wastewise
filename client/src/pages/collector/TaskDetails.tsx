@@ -93,11 +93,7 @@ const TaskDetails: React.FC = () => {
   }
 
   const handleStartTask = async () => {
-    try {
-      await startTaskMutation.mutate(undefined)
-    } catch (error) {
-      console.error('Failed to start task:', error)
-    }
+    await startTaskMutation.mutate(undefined)
   }
 
   const handleCompleteTask = () => {
@@ -105,21 +101,13 @@ const TaskDetails: React.FC = () => {
   }
 
   const handleConfirmComplete = async () => {
-    try {
-      await completeTaskMutation.mutate(completionNotes)
-    } catch (error) {
-      console.error('Failed to complete task:', error)
-    }
+    await completeTaskMutation.mutate(completionNotes)
   }
 
   const handleCancelTask = async () => {
     const reason = prompt('Please provide a reason for cancellation:')
     if (reason) {
-      try {
-        await cancelTaskMutation.mutate(reason)
-      } catch (error) {
-        console.error('Failed to cancel task:', error)
-      }
+      await cancelTaskMutation.mutate(reason)
     }
   }
 

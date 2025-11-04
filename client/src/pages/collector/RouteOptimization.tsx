@@ -43,8 +43,6 @@ const RouteOptimization: React.FC = () => {
       })
 
       setOptimizedRoute(optimized)
-    } catch (error) {
-      console.error('Failed to optimize route:', error)
     } finally {
       setIsOptimizing(false)
     }

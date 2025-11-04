@@ -26,7 +26,6 @@ const ReportDetail: React.FC = () => {
 			showToast({ message: 'Report updated successfully!', type: 'success' })
 		},
 		onError: (error: Error) => {
-			console.error('Error updating report:', error)
 			showToast({ message: error.message || 'Failed to update report. Please try again.', type: 'error' })
 		}
 	})
@@ -49,7 +48,6 @@ const ReportDetail: React.FC = () => {
 			navigate('/reports')
 		},
 		onError: (error: Error) => {
-			console.error('Error deleting report:', error)
 			showToast({ message: error.message || 'Failed to delete report. Please try again.', type: 'error' })
 		}
 	})
@@ -140,9 +138,8 @@ const ReportDetail: React.FC = () => {
 									description: `${report.description}\n\nStatus: ${report.status}\nPriority: ${report.priority}\nVolume: ${report.estimatedVolume} m³`,
 									color: '#ef4444' // Red color for waste reports
 								}]}
-								onMarkerClick={(marker) => {
-									console.log('Marker clicked:', marker)
-									// You can add additional functionality here, like opening a popup or navigating
+								onMarkerClick={() => {
+									// Marker clicked
 								}}
 								height="400px"
 								interactive={true}
