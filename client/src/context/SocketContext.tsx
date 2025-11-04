@@ -39,13 +39,32 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       return
     }
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL
+    // Get socket URL from env or fallback to API base URL
+    const getSocketURL = () => {
+      const socketUrl = import.meta.env.VITE_SOCKET_URL
+      const apiUrl = import.meta.env.VITE_API_BASE_URL
+      
+      if (socketUrl) {
+        return socketUrl
+      }
+      
+      // If no socket URL, derive from API URL by removing /api suffix
+      if (apiUrl) {
+        return apiUrl.replace(/\/api$/, '')
+      }
+      
+      // Fallback to current origin for development
+      return window.location.origin
+    }
+
+    const socketUrl = getSocketURL()
 
     console.log('Creating socket connection to:', socketUrl)
     console.log('User token:', user.token ? 'Present' : 'Missing')
     console.log('User ID:', user.id)
 
     const newSocket = io(socketUrl, {
+      path: '/socket.io/',
       auth: {
         token: user.token,
         userId: user.id || user._id,

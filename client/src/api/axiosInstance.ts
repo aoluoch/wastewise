@@ -1,7 +1,25 @@
 import axios from 'axios'
 import { ApiError } from '../types'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api'
+// Ensure the base URL always includes /api prefix
+const getBaseURL = () => {
+  const envURL = import.meta.env.VITE_API_BASE_URL
+  
+  // If no env URL, use /api for relative paths
+  if (!envURL) {
+    return '/api'
+  }
+  
+  // If env URL already ends with /api, use it as is
+  if (envURL.endsWith('/api')) {
+    return envURL
+  }
+  
+  // Otherwise, append /api to the env URL
+  return `${envURL}/api`
+}
+
+const baseURL = getBaseURL()
 
 export const axiosInstance = axios.create({
   baseURL,
