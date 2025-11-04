@@ -1,0 +1,20 @@
+# Netlify Configuration File
+
+# This section defines the build settings (optional, but good practice)
+[build]
+  # Specify the directory that Netlify should publish (your build output)
+  # Change 'dist' to 'build' or whatever your build tool uses if necessary
+  publish = "dist"
+  # Specify the command to run your build
+  command = "npm run build"
+
+# This section defines the redirect rules
+[[redirects]]
+  # The path to capture (any path that doesn't match a file)
+  from = "/*"
+  # The destination to redirect to (your main index file)
+  to = "/index.html"
+  # The status code (200 preserves the URL in the browser bar)
+  status = 200
+  # Ensure the rule only applies when a file is NOT found
+  force = false
