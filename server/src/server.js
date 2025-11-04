@@ -7,6 +7,8 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 require('express-async-errors');
 require('dotenv').config();
 
@@ -65,19 +67,34 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim().replace(/\/$/, '')).filter(Boolean)
   : ['http://localhost:3000', 'http://localhost:5173'];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+// Log CORS configuration on startup
+console.log('CORS Configuration:', {
+  nodeEnv: process.env.NODE_ENV,
+  allowedOrigins: allowedOrigins.length > 0 ? allowedOrigins : ['NONE - WILL ALLOW ALL'],
+  frontendUrl: process.env.FRONTEND_URL || 'NOT SET'
+});
+
+// If no origins are configured in production, warn and allow all (fallback)
+const corsOriginCheck = allowedOrigins.length === 0 && process.env.NODE_ENV === 'production'
+  ? (origin, callback) => {
+      console.warn('⚠️  WARNING: FRONTEND_URL not set in production. Allowing all origins as fallback.');
       callback(null, true);
-    } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
-      callback(new Error('Not allowed by CORS'));
     }
-  },
+  : (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked origin: ${origin}`);
+        console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    };
+
+app.use(cors({
+  origin: corsOriginCheck,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
