@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { reportsApi } from '../../api/reportsApi'
 import Button from '../../components/Button'
+import { useAuth } from '../../hooks/useAuth'
 
 interface ReportFeedItem {
   _id: string
@@ -20,13 +21,19 @@ interface ReportFeedItem {
   priority: string
   estimatedVolume: number
   notes?: string
-  userId: { firstName: string; lastName: string; email: string }
+  userId: { 
+    _id: string
+    firstName: string
+    lastName: string
+    email: string 
+  }
   createdAt: string
   updatedAt: string
 }
 
 const Feed: React.FC = () => {
 	const qc = useQueryClient()
+	const { user } = useAuth()
 	const { data: reports = [], isLoading, error } = useQuery({ 
 		queryKey: ['reports','feed'], 
 		queryFn: async () => {
@@ -111,15 +118,26 @@ const Feed: React.FC = () => {
 									<Link to={`/reports/${r._id}`}>
 										<Button type="button" variant="outline" size="sm">View Details</Button>
 									</Link>
-									{/* Delete allowed server-side for owners; other users will be rejected */}
-									<Button 
-										type="button" 
-										variant="ghost" 
-										size="sm"
-										onClick={() => deleteMutation.mutate(r._id)}
-									>
-										Delete
-									</Button>
+									{/* Only show edit and delete buttons to the report owner */}
+									{user && r.userId?._id && (user.id === r.userId._id || user._id === r.userId._id) && (
+										<>
+											<Link to={`/reports/${r._id}/edit`}>
+												<Button type="button" variant="outline" size="sm">Edit</Button>
+											</Link>
+											<Button 
+												type="button" 
+												variant="ghost" 
+												size="sm"
+												onClick={() => {
+													if (window.confirm('Are you sure you want to delete this report?')) {
+														deleteMutation.mutate(r._id)
+													}
+												}}
+											>
+												Delete
+											</Button>
+										</>
+									)}
 								</div>
 							</div>
 						</div>
