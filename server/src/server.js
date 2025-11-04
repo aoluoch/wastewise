@@ -63,7 +63,7 @@ if (process.env.NODE_ENV === 'production') {
 // CORS configuration
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean)
-  : ['http://localhost:3000', 'http://localhost:5173'];
+  : ['https://wasteweb.netlify.app/'];
 
 app.use(cors({
   origin: function (origin, callback) {
