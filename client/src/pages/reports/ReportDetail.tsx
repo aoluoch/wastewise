@@ -14,7 +14,9 @@ const ReportDetail: React.FC = () => {
 	const { data: report, isLoading } = useQuery({ queryKey: ['reports','detail', id], queryFn: () => reportsApi.getById(id), enabled: Boolean(id) })
 	const [description, setDescription] = useState('')
 	const [notes, setNotes] = useState('')
-	const [isEditing, setIsEditing] = useState(false)
+	// Check if URL ends with /edit to auto-enable edit mode
+	const isEditRoute = window.location.pathname.endsWith('/edit')
+	const [isEditing, setIsEditing] = useState(isEditRoute)
 	const initializedRef = useRef(false)
 
 	const updateMutation = useMutation({
@@ -24,6 +26,10 @@ const ReportDetail: React.FC = () => {
 			qc.invalidateQueries({ queryKey: ['reports','feed'] })
 			setIsEditing(false)
 			showToast({ message: 'Report updated successfully!', type: 'success' })
+			// If accessed via /edit route, navigate back to detail page
+			if (isEditRoute) {
+				navigate(`/reports/${id}`, { replace: true })
+			}
 		},
 		onError: (error: Error) => {
 			showToast({ message: error.message || 'Failed to update report. Please try again.', type: 'error' })
@@ -252,6 +258,10 @@ const ReportDetail: React.FC = () => {
 										setNotes(report.notes || '')
 									}
 									initializedRef.current = false
+									// If accessed via /edit route, navigate back to detail page
+									if (isEditRoute) {
+										navigate(`/reports/${id}`, { replace: true })
+									}
 								}}
 								disabled={updateMutation.isPending}
 							>

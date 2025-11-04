@@ -130,6 +130,7 @@ const AppRoutes: React.FC = () => {
       >
         <Route index element={<Feed />} />
         <Route path=":id" element={<ReportDetail />} />
+        <Route path=":id/edit" element={<ReportDetail />} />
       </Route>
 
       {/* Redirect authenticated users to their dashboard */}
