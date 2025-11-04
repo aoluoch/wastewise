@@ -95,6 +95,7 @@ Wastewise is a modern waste management platform that leverages technology to str
 - **Nodemailer** - Email sending
 - **Multer** - File upload handling
 - **Express Validator** - Input validation
+- **Swagger/OpenAPI** - API documentation
 - **Jest** - Testing framework
 
 ### DevOps & Deployment
@@ -251,10 +252,28 @@ Wastewise/
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
    - API Health Check: http://localhost:5000/health
+   - **API Documentation (Swagger)**: http://localhost:5000/api-docs
 
 ## 📚 API Documentation
 
-### Authentication Endpoints
+### Interactive API Documentation
+
+Wastewise provides comprehensive interactive API documentation using **Swagger/OpenAPI 3.0**.
+
+**Access the API Documentation:**
+- **Swagger UI**: http://localhost:5000/api-docs
+- **OpenAPI JSON**: http://localhost:5000/api-docs.json
+
+The Swagger UI provides:
+- ✅ Interactive API testing
+- ✅ Request/response examples
+- ✅ Schema definitions
+- ✅ Authentication testing
+- ✅ Real-time API exploration
+
+### Quick API Reference
+
+#### Authentication Endpoints
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|---------|
@@ -263,6 +282,8 @@ Wastewise/
 | GET | `/api/auth/me` | Get current user info | Private |
 | POST | `/api/auth/refresh` | Refresh access token | Public |
 | POST | `/api/auth/logout` | Logout user | Private |
+| POST | `/api/auth/forgot-password` | Request password reset | Public |
+| POST | `/api/auth/reset-password` | Reset password with token | Public |
 
 ### User Management (Admin Only)
 
@@ -285,16 +306,21 @@ Wastewise/
 | DELETE | `/api/reports/:id` | Delete report | Admin |
 | GET | `/api/reports/nearby` | Get nearby reports | Private |
 
-### Pickup Management
+### Pickup Task Management
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|---------|
-| POST | `/api/pickups` | Schedule pickup | Admin |
-| GET | `/api/pickups` | List pickup tasks | Private |
-| GET | `/api/pickups/:id` | Get pickup task | Private |
-| PATCH | `/api/pickups/:id/start` | Start pickup task | Collector |
-| PATCH | `/api/pickups/:id/complete` | Complete pickup | Collector |
-| PATCH | `/api/pickups/:id/cancel` | Cancel pickup | Admin/Collector |
+| POST | `/api/pickups/tasks` | Schedule pickup task | Admin |
+| GET | `/api/pickups/tasks` | List all pickup tasks | Admin |
+| GET | `/api/pickups/my-tasks` | Get collector's tasks | Collector |
+| GET | `/api/pickups/tasks/:id` | Get pickup task details | Private |
+| POST | `/api/pickups/tasks/:id/start` | Start pickup task | Collector |
+| POST | `/api/pickups/tasks/:id/complete` | Complete pickup task | Collector |
+| POST | `/api/pickups/tasks/:id/cancel` | Cancel pickup task | Admin/Collector |
+| POST | `/api/pickups/tasks/:id/reschedule` | Reschedule pickup task | Admin/Collector |
+| POST | `/api/pickups/tasks/:id/update-location` | Update collector location | Collector |
+| GET | `/api/pickups/collector/stats` | Get collector statistics | Collector |
+| GET | `/api/pickups/collector/performance` | Get performance metrics | Collector |
 
 ### Notifications
 
@@ -305,6 +331,36 @@ Wastewise/
 | PATCH | `/api/notifications/mark-all-read` | Mark all as read | Private |
 | DELETE | `/api/notifications/:id` | Delete notification | Private |
 | POST | `/api/notifications/send` | Send notification | Admin |
+
+### Admin Analytics Endpoints
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|---------|  
+| GET | `/api/admin/pending-reports` | Get pending waste reports | Admin |
+| POST | `/api/admin/assign-collector` | Assign collector to report | Admin |
+| GET | `/api/admin/reports` | Get all reports with filters | Admin |
+| PATCH | `/api/admin/reports/:id/status` | Update report status | Admin |
+| GET | `/api/admin/users` | Get all users with filters | Admin |
+| PATCH | `/api/admin/users/:id/status` | Update user status | Admin |
+| GET | `/api/admin/analytics/reports` | Get report analytics | Admin |
+| GET | `/api/admin/analytics/users` | Get user analytics | Admin |
+| GET | `/api/admin/export/reports` | Export reports (CSV/Excel) | Admin |
+| GET | `/api/admin/export/users` | Export users (CSV/Excel) | Admin |
+
+### Messaging Endpoints
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|---------|  
+| GET | `/api/messages/rooms/:room/messages` | Get room messages | Private |
+| POST | `/api/messages/send` | Send message | Private |
+
+### Statistics Endpoints
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|---------|  
+| GET | `/api/statistics/dashboard` | Get dashboard statistics | Private |
+| GET | `/api/statistics/reports` | Get report statistics | Admin |
+| GET | `/api/statistics/collectors` | Get collector statistics | Admin |
 
 ### Example API Usage
 
@@ -317,7 +373,18 @@ curl -X POST http://localhost:5000/api/auth/register \
     "password": "password123",
     "firstName": "John",
     "lastName": "Doe",
-    "phone": "+1234567890"
+    "phone": "+1234567890",
+    "role": "resident"
+  }'
+```
+
+**Login:**
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
   }'
 ```
 
@@ -331,7 +398,76 @@ curl -X POST http://localhost:5000/api/reports \
   -F "location[coordinates][lat]=40.7128" \
   -F "location[coordinates][lng]=-74.0060" \
   -F "estimatedVolume=5.5" \
-  -F "images=@/path/to/image.jpg"
+  -F "priority=medium" \
+  -F "images=@/path/to/image1.jpg" \
+  -F "images=@/path/to/image2.jpg"
+```
+
+**Get collector's tasks:**
+```bash
+curl -X GET "http://localhost:5000/api/pickups/my-tasks?page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_COLLECTOR_TOKEN"
+```
+
+**Complete a pickup task:**
+```bash
+curl -X POST http://localhost:5000/api/pickups/tasks/TASK_ID/complete \
+  -H "Authorization: Bearer YOUR_COLLECTOR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "notes": "Task completed successfully"
+  }'
+```
+
+### Testing with Swagger UI
+
+1. **Start the server**: `npm run dev`
+2. **Open Swagger UI**: Navigate to http://localhost:5000/api-docs
+3. **Authenticate**: Click "Authorize" button and enter your JWT token
+4. **Test endpoints**: Expand any endpoint and click "Try it out"
+5. **Execute**: Fill in parameters and click "Execute"
+6. **View response**: See the response body, headers, and status code
+
+### API Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    // Response data
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error message",
+  "errors": {
+    "field": ["Validation error message"]
+  }
+}
+```
+
+**Paginated Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 100,
+      "totalPages": 10
+    }
+  }
+}
 ```
 
 ## 🎨 Frontend Guide
