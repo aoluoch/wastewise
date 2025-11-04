@@ -354,13 +354,8 @@ router.get('/:id', [
       hasCoordinates: !!(report.location?.coordinates?.lat && report.location?.coordinates?.lng)
     })
 
-    // Check access permissions
-    if (req.user.role === 'resident' && report.userId._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
+    // Allow all authenticated users to view report details (community feed)
+    // No access restrictions - everyone can view all reports
 
     res.json({
       success: true,
