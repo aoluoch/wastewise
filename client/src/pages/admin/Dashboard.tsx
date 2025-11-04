@@ -14,8 +14,7 @@ const AdminDashboard: React.FC = () => {
       try {
         const data = await adminApi.getDashboardStats()
         setStats(data)
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error)
+      } catch {
         showToast({ message: 'Failed to load dashboard statistics', type: 'error' })
       } finally {
         setLoading(false)

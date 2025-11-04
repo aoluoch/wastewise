@@ -15,14 +15,6 @@ const ResidentDashboard: React.FC = () => {
     refetchInterval: 30000, // Refetch every 30 seconds
   })
 
-  // Debug logging
-  React.useEffect(() => {
-    if (stats) {
-      console.log('Dashboard stats received:', stats)
-      console.log('Recent reports:', stats.recentReports)
-    }
-  }, [stats])
-
   return (
     <div className="space-y-6 font-['Poppins']">
       {/* Welcome Section */}

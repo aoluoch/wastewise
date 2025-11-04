@@ -101,8 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .then((user) => {
           dispatch({ type: 'LOGIN_SUCCESS', payload: user })
         })
-        .catch((error) => {
-          console.error('Token verification failed:', error)
+        .catch(() => {
           localStorage.removeItem('token')
           localStorage.removeItem('refreshToken')
           dispatch({ type: 'SET_LOADING', payload: false })
@@ -117,7 +116,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'LOGIN_START' })
       const user = await authApi.login(credentials)
-      console.log('Login response:', user)
       localStorage.setItem('token', user.token)
       localStorage.setItem('refreshToken', user.refreshToken)
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
