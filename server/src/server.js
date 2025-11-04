@@ -28,10 +28,15 @@ const app = express();
 const server = createServer(app);
 
 // Socket.io setup
+const socketAllowedOrigins = process.env.NODE_ENV === 'production'
+  ? (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean)
+  : ['http://localhost:3000', 'http://localhost:5173'];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: socketAllowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
