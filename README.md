@@ -31,22 +31,41 @@ Wastewise is a modern waste management platform that leverages technology to str
 
 ## ✨ Features
 
+### 🆕 Latest Updates (v2.0)
+
+#### Location-Based Task Assignment
+- **County & Constituency Integration**: All waste reports now include detailed location data
+- **Smart Collector Matching**: Admins can easily assign collectors from the same area as the waste report
+- **Advanced Filtering**: Filter reports by county, constituency, priority, and search terms
+- **Collector Application with Location**: Residents applying to be collectors must provide their service area
+- **Prioritized Collector List**: When assigning tasks, collectors from the same county are shown first
+
+#### Enhanced Admin Features
+- **Comprehensive Search**: Search reports by description, type, location, or reporter details
+- **Multi-Filter Support**: Combine county, constituency, and priority filters for precise results
+- **Location-Aware Assignment**: See waste location and collector location side-by-side
+- **Collector Application Management**: Review and approve/reject collector applications with location info
+
 ### 🔐 Authentication & User Management
 - **Multi-role System**: Admin, Collector, Resident roles with specific permissions
 - **Secure Authentication**: JWT-based authentication with refresh tokens
-- **Profile Management**: Complete user profiles with location data
+- **Profile Management**: Complete user profiles with location data (county & constituency)
 - **Role-based Access Control**: Granular permissions for different user types
+- **Collector Application System**: Residents can apply to become collectors with location verification
 
 ### 📱 Waste Reporting
 - **Smart Reporting**: Create detailed waste reports with photos
-- **Location Services**: GPS-based location tracking and mapping
+- **Location Services**: GPS-based location tracking with county and constituency data
+- **Geographic Filtering**: Filter and search reports by administrative boundaries
 - **AI Classification**: Automatic waste type detection using TensorFlow.js
 - **Priority System**: Urgent, high, medium, low priority levels
 - **Real-time Updates**: Live status updates and notifications
 
 ### 🚛 Pickup Management
 - **Task Scheduling**: Automated pickup scheduling based on location and capacity
+- **Location-Based Assignment**: Smart collector assignment based on county and constituency
 - **Route Optimization**: Efficient route planning for collectors
+- **Advanced Search & Filtering**: Search reports by location, priority, and status
 - **Status Tracking**: Real-time task status updates
 - **Time Management**: Duration tracking and completion notes
 - **Photo Documentation**: Before/after photos for verification
@@ -183,9 +202,9 @@ Wastewise/
 
 2. **Install dependencies**
    ```bash
-   # Install frontend dependencies
+   # Install frontend dependencies (using pnpm)
    cd client
-   npm install
+   pnpm install
    
    # Install backend dependencies
    cd ../server
@@ -245,7 +264,7 @@ Wastewise/
    
    # Terminal 2 - Frontend
    cd client
-   npm run dev
+   pnpm run dev
    ```
 
 7. **Access the application**
@@ -285,15 +304,16 @@ The Swagger UI provides:
 | POST | `/api/auth/forgot-password` | Request password reset | Public |
 | POST | `/api/auth/reset-password` | Reset password with token | Public |
 
-### User Management (Admin Only)
+### User Management
 
 | Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
+|--------|----------|-------------|---------|  
 | GET | `/api/users` | List all users | Admin |
 | GET | `/api/users/:id` | Get user by ID | Admin |
 | PATCH | `/api/users/:id` | Update user | Admin |
 | DELETE | `/api/users/:id` | Delete user | Admin |
 | GET | `/api/users/stats` | Get user statistics | Admin |
+| POST | `/api/users/apply-for-collector` | Apply to become a collector | Resident |
 
 ### Waste Reports
 
@@ -336,8 +356,12 @@ The Swagger UI provides:
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|---------|  
-| GET | `/api/admin/pending-reports` | Get pending waste reports | Admin |
-| POST | `/api/admin/assign-collector` | Assign collector to report | Admin |
+| GET | `/api/admin/pending-reports` | Get pending waste reports with location data | Admin |
+| POST | `/api/admin/assign-collector` | Assign collector to report (location-aware) | Admin |
+| GET | `/api/admin/collectors` | Get all active collectors with location info | Admin |
+| GET | `/api/admin/collector-applications` | Get pending collector applications | Admin |
+| PUT | `/api/admin/collector-applications/:id/approve` | Approve collector application | Admin |
+| PUT | `/api/admin/collector-applications/:id/reject` | Reject collector application | Admin |
 | GET | `/api/admin/reports` | Get all reports with filters | Admin |
 | PATCH | `/api/admin/reports/:id/status` | Update report status | Admin |
 | GET | `/api/admin/users` | Get all users with filters | Admin |
@@ -495,19 +519,19 @@ The frontend is built with React and TypeScript, following modern best practices
 
 ```bash
 # Start development server
-npm run dev
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Run tests
-npm run test
+pnpm run test
 
 # Lint code
-npm run lint
+pnpm run lint
 
 # Type checking
-npm run type-check
+pnpm run type-check
 ```
 
 ## 🔧 Backend Guide
@@ -571,7 +595,7 @@ npm run test:watch
 1. **Build frontend**
    ```bash
    cd client
-   npm run build
+   pnpm run build
    ```
 
 2. **Start backend**
@@ -605,9 +629,9 @@ npm run test:watch
 
 ```bash
 cd client
-npm run test          # Run tests
-npm run test:coverage # Run with coverage
-npm run test:ui       # Run with UI
+pnpm run test          # Run tests
+pnpm run test:coverage # Run with coverage
+pnpm run test:ui       # Run with UI
 ```
 
 ### Backend Testing

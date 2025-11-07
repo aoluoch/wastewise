@@ -320,9 +320,22 @@ router.get('/stats', [
 // @access  Private (Resident)
 router.post('/apply-for-collector', [
   authorize('resident'),
+  body('county')
+    .trim()
+    .notEmpty()
+    .withMessage('County is required')
+    .isLength({ max: 100 })
+    .withMessage('County cannot exceed 100 characters'),
+  body('constituency')
+    .trim()
+    .notEmpty()
+    .withMessage('Constituency is required')
+    .isLength({ max: 100 })
+    .withMessage('Constituency cannot exceed 100 characters'),
   validate
 ], async (req, res) => {
   try {
+    const { county, constituency } = req.body;
     const user = await User.findById(req.user._id);
     
     if (!user) {
@@ -356,8 +369,10 @@ router.post('/apply-for-collector', [
       });
     }
 
-    // Update application status
+    // Update application status and location
     user.collectorApplicationStatus = 'pending';
+    user.county = county;
+    user.constituency = constituency;
     await user.save();
 
     res.json({

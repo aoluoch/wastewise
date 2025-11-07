@@ -4,22 +4,32 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../context/ToastContext';
 import Button from './Button';
 import { axiosInstance } from '../api/axiosInstance';
+import { KENYAN_COUNTIES } from '../data/kenyanLocations';
 
 const CollectorApplicationForm: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    county: user?.county || '',
+    constituency: user?.constituency || ''
+  });
+
+  const selectedCounty = KENYAN_COUNTIES.find(c => c.name === formData.county);
 
   const applyForCollectorMutation = useMutation({
-    mutationFn: async () => {
-      const response = await axiosInstance.post('/users/apply-for-collector');
+    mutationFn: async (data: { county: string; constituency: string }) => {
+      const response = await axiosInstance.post('/users/apply-for-collector', data);
       return response.data;
     },
     onSuccess: () => {
       showToast({ type: 'success', message: 'Application submitted successfully! Please wait for admin approval.' });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['auth'] });
+      setShowForm(false);
+      setFormData({ county: '', constituency: '' });
     },
     onError: (error: unknown) => {
       const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to submit application';
@@ -31,8 +41,12 @@ const CollectorApplicationForm: React.FC = () => {
   });
 
   const handleApply = () => {
+    if (!formData.county || !formData.constituency) {
+      showToast({ type: 'error', message: 'Please select both county and constituency' });
+      return;
+    }
     setIsSubmitting(true);
-    applyForCollectorMutation.mutate();
+    applyForCollectorMutation.mutate(formData);
   };
 
   // Don't show if user is already a collector
@@ -75,11 +89,10 @@ const CollectorApplicationForm: React.FC = () => {
               Your previous application was not approved. You can reapply to become a collector and help keep your community clean.
             </p>
             <Button
-              onClick={handleApply}
-              disabled={isSubmitting}
+              onClick={() => setShowForm(true)}
               variant="primary"
             >
-              {isSubmitting ? 'Submitting...' : 'Reapply Now'}
+              Reapply Now
             </Button>
           </div>
         </div>
@@ -120,12 +133,110 @@ const CollectorApplicationForm: React.FC = () => {
               </div>
             </div>
             <Button
-              onClick={handleApply}
-              disabled={isSubmitting}
+              onClick={() => setShowForm(true)}
               variant="primary"
             >
-              {isSubmitting ? 'Submitting...' : 'Apply to Become a Collector'}
+              Apply to Become a Collector
             </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Application Form Modal
+  if (showForm) {
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-700">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Collector Application
+              </h3>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setFormData({ county: user?.county || '', constituency: user?.constituency || '' });
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Please provide your location information to help us assign collection tasks efficiently.
+            </p>
+
+            <div className="space-y-4">
+              {/* County Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                  County *
+                </label>
+                <select
+                  value={formData.county}
+                  onChange={(e) => setFormData({ county: e.target.value, constituency: '' })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">Select County...</option>
+                  {KENYAN_COUNTIES.map((county) => (
+                    <option key={county.name} value={county.name}>
+                      {county.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Constituency Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                  Constituency *
+                </label>
+                <select
+                  value={formData.constituency}
+                  onChange={(e) => setFormData({ ...formData, constituency: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!formData.county}
+                  required
+                >
+                  <option value="">Select Constituency...</option>
+                  {selectedCounty?.constituencies.map((constituency) => (
+                    <option key={constituency} value={constituency}>
+                      {constituency}
+                    </option>
+                  ))}
+                </select>
+                {!formData.county && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Please select a county first
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <Button
+                onClick={() => {
+                  setShowForm(false);
+                  setFormData({ county: user?.county || '', constituency: user?.constituency || '' });
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleApply}
+                disabled={isSubmitting || !formData.county || !formData.constituency}
+                variant="primary"
+                className="flex-1"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ export interface User {
   role: UserRole
   phone?: string
   address?: Address
+  county?: string
+  constituency?: string
   isActive: boolean
   collectorApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   createdAt: string

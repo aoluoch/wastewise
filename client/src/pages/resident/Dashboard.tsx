@@ -43,10 +43,27 @@ const ResidentDashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['statistics', 'resident'] })
     }
 
+    // Listen for application status updates
+    const handleApplicationApproved = (data: { userId: string }) => {
+      if (data.userId === user?._id) {
+        queryClient.invalidateQueries({ queryKey: ['user'] })
+        queryClient.invalidateQueries({ queryKey: ['auth'] })
+      }
+    }
+
+    const handleApplicationRejected = (data: { userId: string }) => {
+      if (data.userId === user?._id) {
+        queryClient.invalidateQueries({ queryKey: ['user'] })
+        queryClient.invalidateQueries({ queryKey: ['auth'] })
+      }
+    }
+
     socket.on('new_report', handleNewReport)
     socket.on('task_update', handleReportUpdate)
     socket.on('report_deleted', handleReportDeleted)
     socket.on('assign_task', handleTaskUpdate)
+    socket.on('application_approved', handleApplicationApproved)
+    socket.on('application_rejected', handleApplicationRejected)
 
     // Cleanup listeners on unmount
     return () => {
@@ -54,8 +71,10 @@ const ResidentDashboard: React.FC = () => {
       socket.off('task_update', handleReportUpdate)
       socket.off('report_deleted', handleReportDeleted)
       socket.off('assign_task', handleTaskUpdate)
+      socket.off('application_approved', handleApplicationApproved)
+      socket.off('application_rejected', handleApplicationRejected)
     }
-  }, [socket, isConnected, queryClient])
+  }, [socket, isConnected, queryClient, user?._id])
 
   return (
     <div className="space-y-6 font-['Poppins']">
@@ -68,6 +87,47 @@ const ResidentDashboard: React.FC = () => {
           Manage your waste reports and track pickup schedules
         </p>
       </div>
+
+      {/* Collector Application Status Notification */}
+      {user?.collectorApplicationStatus === 'approved' && user?.role !== 'collector' && (
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-lg p-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">
+                🎉 Application Approved!
+              </h3>
+              <p className="mt-2 text-sm text-green-700 dark:text-green-300">
+                Congratulations! Your application to become a collector has been approved. Please log out and log back in to access your collector dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {user?.collectorApplicationStatus === 'rejected' && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">
+                Application Not Approved
+              </h3>
+              <p className="mt-2 text-sm text-red-700 dark:text-red-300">
+                Unfortunately, your collector application was not approved at this time. You can reapply using the form below.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4 lg:gap-6">

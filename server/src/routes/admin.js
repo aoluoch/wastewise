@@ -823,7 +823,7 @@ router.get('/collectors', [
       role: 'collector', 
       isActive: true 
     })
-    .select('firstName lastName email phone')
+    .select('firstName lastName email phone county constituency')
     .sort({ firstName: 1 });
 
     res.json({
@@ -860,7 +860,7 @@ router.get('/pending-reports', [
 
     const [reports, total] = await Promise.all([
       WasteReport.find(filter)
-        .populate('userId', 'firstName lastName email phone')
+        .populate('userId', 'firstName lastName email phone county constituency')
         .populate('assignedCollectorId', 'firstName lastName email')
         .sort({ priority: -1, createdAt: -1 })
         .skip(skip)

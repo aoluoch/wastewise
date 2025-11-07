@@ -12,6 +12,8 @@ interface Report {
       lng: number
     }
   }
+  county: string
+  constituency: string
   priority: string
   estimatedVolume: number
   status: string
@@ -21,6 +23,8 @@ interface Report {
     lastName: string
     email: string
     phone?: string
+    county?: string
+    constituency?: string
   }
   assignedCollectorId?: {
     _id: string
@@ -37,6 +41,8 @@ interface Collector {
   lastName: string
   email: string
   phone?: string
+  county?: string
+  constituency?: string
 }
 
 interface AssignmentFormData {
@@ -62,6 +68,10 @@ const TaskAssignment: React.FC = () => {
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterCounty, setFilterCounty] = useState('')
+  const [filterConstituency, setFilterConstituency] = useState('')
+  const [filterPriority, setFilterPriority] = useState('')
 
   // Fetch pending reports
   const fetchPendingReports = useCallback(async () => {
@@ -74,19 +84,33 @@ const TaskAssignment: React.FC = () => {
         }
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch pending reports')
-      }
-
       const data = await response.json()
-      setReports(data.data.reports)
-      setTotalPages(data.data.pagination.totalPages)
+
+      // Handle both success and error responses
+      if (response.ok && data.success) {
+        setReports(data.data.reports || [])
+        setTotalPages(data.data.pagination?.totalPages || 1)
+      } else {
+        // Only show error toast for actual errors, not empty results
+        if (response.status !== 404 && response.status !== 200) {
+          showToast({
+            type: 'error',
+            title: 'Error',
+            message: data.message || 'Failed to load pending reports'
+          })
+        }
+        setReports([])
+        setTotalPages(1)
+      }
     } catch {
+      // Only show error for network/connection issues
       showToast({
         type: 'error',
-        title: 'Error',
-        message: 'Failed to load pending reports'
+        title: 'Connection Error',
+        message: 'Unable to connect to server. Please check your connection.'
       })
+      setReports([])
+      setTotalPages(1)
     }
   }, [currentPage, showToast])
 
@@ -189,6 +213,45 @@ const TaskAssignment: React.FC = () => {
     }
   }
 
+  // Filter reports based on search and filters
+  const filteredReports = reports.filter(report => {
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase()
+      const matchesSearch = 
+        report.description.toLowerCase().includes(search) ||
+        report.type.toLowerCase().includes(search) ||
+        report.location.address.toLowerCase().includes(search) ||
+        `${report.userId.firstName} ${report.userId.lastName}`.toLowerCase().includes(search) ||
+        report.userId.email.toLowerCase().includes(search)
+      
+      if (!matchesSearch) return false
+    }
+
+    // County filter
+    if (filterCounty && report.county !== filterCounty) {
+      return false
+    }
+
+    // Constituency filter
+    if (filterConstituency && report.constituency !== filterConstituency) {
+      return false
+    }
+
+    // Priority filter
+    if (filterPriority && report.priority !== filterPriority) {
+      return false
+    }
+
+    return true
+  })
+
+  // Get unique counties and constituencies from reports
+  const availableCounties = [...new Set(reports.map(r => r.county).filter(Boolean))]
+  const availableConstituencies = filterCounty 
+    ? [...new Set(reports.filter(r => r.county === filterCounty).map(r => r.constituency).filter(Boolean))]
+    : [...new Set(reports.map(r => r.constituency).filter(Boolean))]
+
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
       case 'urgent':
@@ -252,27 +315,128 @@ const TaskAssignment: React.FC = () => {
           </p>
         </div>
 
+        {/* Search and Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700 p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Search */}
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                Search Reports
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by description, type, location, or reporter..."
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* County Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                County
+              </label>
+              <select
+                value={filterCounty}
+                onChange={(e) => {
+                  setFilterCounty(e.target.value)
+                  setFilterConstituency('')
+                }}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Counties</option>
+                {availableCounties.map((county) => (
+                  <option key={county} value={county}>
+                    {county}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Constituency Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                Constituency
+              </label>
+              <select
+                value={filterConstituency}
+                onChange={(e) => setFilterConstituency(e.target.value)}
+                disabled={!filterCounty}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+              >
+                <option value="">All Constituencies</option>
+                {availableConstituencies.map((constituency) => (
+                  <option key={constituency} value={constituency}>
+                    {constituency}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Priority Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                Priority
+              </label>
+              <select
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Priorities</option>
+                <option value="urgent">Urgent</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters */}
+          {(searchTerm || filterCounty || filterConstituency || filterPriority) && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Showing {filteredReports.length} of {reports.length} reports
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('')
+                  setFilterCounty('')
+                  setFilterConstituency('')
+                  setFilterPriority('')
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Reports List */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Pending Reports ({reports.length})
+              Pending Reports ({filteredReports.length})
             </h2>
           </div>
 
-          {reports.length === 0 ? (
+          {filteredReports.length === 0 ? (
             <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              <span className="text-6xl mb-4 block">🎉</span>
+              <span className="text-6xl mb-4 block">📋</span>
               <h3 className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                All Caught Up!
+                {reports.length === 0 ? 'No Reports Found' : 'No Matching Reports'}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                No pending reports need collector assignment at the moment.
+                {reports.length === 0 
+                  ? 'There are currently no pending reports that need collector assignment.'
+                  : 'Try adjusting your search or filter criteria.'}
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {reports.map((report) => (
+              {filteredReports.map((report) => (
                 <div key={report._id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -295,6 +459,12 @@ const TaskAssignment: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                         <div>
                           <p><strong>📍 Location:</strong> {report.location.address}</p>
+                          {(report.county || report.constituency) && (
+                            <p>
+                              <strong>🗺️ Waste Location:</strong> {report.county}
+                              {report.constituency && `, ${report.constituency}`}
+                            </p>
+                          )}
                           <p><strong>👤 Reporter:</strong> {report.userId.firstName} {report.userId.lastName}</p>
                           <p><strong>📧 Email:</strong> {report.userId.email}</p>
                           {report.userId.phone && (
@@ -408,12 +578,34 @@ const TaskAssignment: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">Choose a collector...</option>
-                      {collectors.map((collector) => (
-                        <option key={collector._id} value={collector._id}>
-                          {collector.firstName} {collector.lastName} ({collector.email})
-                        </option>
-                      ))}
+                      {/* Collectors from same area (prioritized) */}
+                      {collectors
+                        .filter(c => c.county === selectedReport.county)
+                        .map((collector) => (
+                          <option key={collector._id} value={collector._id}>
+                            ⭐ {collector.firstName} {collector.lastName} - {collector.county}
+                            {collector.constituency && `, ${collector.constituency}`}
+                          </option>
+                        ))}
+                      {/* Other collectors */}
+                      {collectors
+                        .filter(c => c.county !== selectedReport.county)
+                        .length > 0 && (
+                          <option disabled>─── Other Areas ───</option>
+                        )}
+                      {collectors
+                        .filter(c => c.county !== selectedReport.county)
+                        .map((collector) => (
+                          <option key={collector._id} value={collector._id}>
+                            {collector.firstName} {collector.lastName}
+                            {collector.county && ` - ${collector.county}`}
+                            {collector.constituency && `, ${collector.constituency}`}
+                          </option>
+                        ))}
                     </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      ⭐ Collectors from {selectedReport.county} are shown first
+                    </p>
                   </div>
 
                   {/* Scheduled Date */}
