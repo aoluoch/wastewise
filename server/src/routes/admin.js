@@ -545,6 +545,63 @@ router.patch('/users/:id/status', [
   }
 });
 
+// @route   DELETE /api/admin/users/:id
+// @desc    Permanently delete a user
+// @access  Private (admin only)
+router.delete('/users/:id', [
+  authorize('admin'),
+  validate
+], async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Prevent admin from deleting themselves
+    if (id === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Store user info for response
+    const deletedUserInfo = {
+      id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      role: user.role
+    };
+
+    // Delete user and all associated data
+    await Promise.all([
+      User.findByIdAndDelete(id),
+      WasteReport.deleteMany({ userId: id }),
+      PickupTask.deleteMany({ collectorId: id }),
+      Notification.deleteMany({ userId: id })
+    ]);
+
+    res.json({
+      success: true,
+      message: 'User and all associated data deleted permanently',
+      data: deletedUserInfo
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @route   GET /api/admin/export/reports
 // @desc    Export reports data
 // @access  Private (admin only)
@@ -1167,9 +1224,9 @@ router.put('/collector-applications/:userId/approve', [
 router.put('/collector-applications/:userId/reject', [
   authorize('admin'),
   body('reason')
-    .optional()
+    .optional({ values: 'falsy' })
     .trim()
-    .isLength({ max: 500 })
+    .isLength({ min: 0, max: 500 })
     .withMessage('Reason cannot exceed 500 characters'),
   validate
 ], async (req, res) => {

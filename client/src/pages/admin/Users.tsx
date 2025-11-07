@@ -13,8 +13,9 @@ const AdminUsers: React.FC = () => {
     status: '',
     search: ''
   })
-  // const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  // const [showStatusModal, setShowStatusModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const { showToast } = useToast()
 
   const fetchUsers = useCallback(async () => {
@@ -59,6 +60,33 @@ const AdminUsers: React.FC = () => {
     } catch {
       showToast({ message: 'Failed to export users', type: 'error' })
     }
+  }
+
+  const handleDeleteClick = (user: AdminUser) => {
+    setUserToDelete(user)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+
+    try {
+      setIsDeleting(true)
+      await adminApi.deleteUser(userToDelete._id)
+      showToast({ message: 'User deleted permanently', type: 'success' })
+      setShowDeleteModal(false)
+      setUserToDelete(null)
+      fetchUsers()
+    } catch {
+      showToast({ message: 'Failed to delete user', type: 'error' })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setUserToDelete(null)
   }
 
   const getRoleIcon = (role: string) => {
@@ -245,16 +273,24 @@ const AdminUsers: React.FC = () => {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleStatusToggle(user)}
-                      className={`${
-                        user.isActive 
-                          ? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
-                          : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
-                      }`}
-                    >
-                      {user.isActive ? 'Deactivate' : 'Activate'}
-                    </button>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleStatusToggle(user)}
+                        className={`${
+                          user.isActive 
+                            ? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
+                            : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
+                        }`}
+                      >
+                        {user.isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(user)}
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 font-semibold"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -292,6 +328,61 @@ const AdminUsers: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="ml-4 text-lg font-semibold text-gray-900 dark:text-white">
+                Delete User Permanently
+              </h3>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                Are you sure you want to permanently delete this user? This action cannot be undone.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-sm font-medium text-red-800 dark:text-red-300 mb-2">
+                  User: {userToDelete.firstName} {userToDelete.lastName}
+                </p>
+                <p className="text-sm text-red-700 dark:text-red-400 mb-1">
+                  Email: {userToDelete.email}
+                </p>
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  Role: {userToDelete.role}
+                </p>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                ⚠️ This will also delete all associated data including reports, pickup tasks, and notifications.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

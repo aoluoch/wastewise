@@ -141,6 +141,10 @@ export const adminApi = {
     await axiosInstance.patch(`/admin/users/${userId}/status`, { isActive })
   },
 
+  async deleteUser(userId: string): Promise<void> {
+    await axiosInstance.delete(`/admin/users/${userId}`)
+  },
+
   async getReportAnalytics(dateRange?: { start: string; end: string }): Promise<ReportAnalytics> {
     const params = new URLSearchParams()
     if (dateRange) {
