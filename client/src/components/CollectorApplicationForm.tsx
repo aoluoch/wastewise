@@ -31,7 +31,7 @@ const CollectorApplicationForm: React.FC = () => {
         collectorApplicationStatus: 'pending',
         county: variables?.county,
         constituency: variables?.constituency
-      } as any);
+      });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['auth'] });
       setShowForm(false);
