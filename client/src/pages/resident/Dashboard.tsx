@@ -5,6 +5,7 @@ import Button from '../../components/Button'
 import { Link } from 'react-router-dom'
 import { statisticsApi } from '../../api/statisticsApi'
 import { useSocket } from '../../hooks/useSocket'
+import CollectorApplicationForm from '../../components/CollectorApplicationForm'
 
 const ResidentDashboard: React.FC = () => {
   const { user } = useAuth()
@@ -142,6 +143,9 @@ const ResidentDashboard: React.FC = () => {
         </div>
         </Link>
       </div>
+
+      {/* Collector Application Section */}
+      <CollectorApplicationForm />
 
       {/* Dashboard Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">

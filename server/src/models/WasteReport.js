@@ -34,6 +34,16 @@ const wasteReportSchema = new mongoose.Schema({
       }
     }
   },
+  county: {
+    type: String,
+    required: [true, 'County is required'],
+    trim: true
+  },
+  constituency: {
+    type: String,
+    required: [true, 'Constituency is required'],
+    trim: true
+  },
   images: [{
     type: String, // Cloudinary URLs
     required: true

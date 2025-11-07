@@ -1070,4 +1070,164 @@ router.patch('/pickup-tasks/:id/reassign', [
   }
 });
 
+// @route   GET /api/admin/collector-applications
+// @desc    Get all pending collector applications
+// @access  Private (admin only)
+router.get('/collector-applications', [
+  authorize('admin'),
+  validate
+], async (req, res) => {
+  try {
+    const applications = await User.find({
+      collectorApplicationStatus: 'pending'
+    })
+    .select('firstName lastName email phone county constituency createdAt updatedAt collectorApplicationStatus')
+    .sort({ updatedAt: -1 });
+
+    res.json({
+      success: true,
+      data: { applications }
+    });
+  } catch (error) {
+    console.error('Get collector applications error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   PUT /api/admin/collector-applications/:userId/approve
+// @desc    Approve a collector application
+// @access  Private (admin only)
+router.put('/collector-applications/:userId/approve', [
+  authorize('admin'),
+  validate
+], async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.collectorApplicationStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending application found for this user'
+      });
+    }
+
+    // Update user role and application status
+    user.role = 'collector';
+    user.collectorApplicationStatus = 'approved';
+    await user.save();
+
+    // Create notification for the user
+    const notification = new Notification({
+      userId: user._id,
+      type: 'application_approved',
+      title: 'Collector Application Approved',
+      message: 'Congratulations! Your application to become a collector has been approved.',
+      priority: 'high'
+    });
+    await notification.save();
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('application_approved', {
+        userId: user._id,
+        user
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Application approved successfully',
+      data: { user }
+    });
+  } catch (error) {
+    console.error('Approve collector application error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   PUT /api/admin/collector-applications/:userId/reject
+// @desc    Reject a collector application
+// @access  Private (admin only)
+router.put('/collector-applications/:userId/reject', [
+  authorize('admin'),
+  body('reason')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Reason cannot exceed 500 characters'),
+  validate
+], async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.collectorApplicationStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending application found for this user'
+      });
+    }
+
+    const { reason } = req.body;
+
+    // Update application status
+    user.collectorApplicationStatus = 'rejected';
+    await user.save();
+
+    // Create notification for the user
+    const notification = new Notification({
+      userId: user._id,
+      type: 'application_rejected',
+      title: 'Collector Application Update',
+      message: reason || 'Your application to become a collector has been reviewed.',
+      priority: 'medium'
+    });
+    await notification.save();
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('application_rejected', {
+        userId: user._id,
+        user
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Application rejected',
+      data: { user }
+    });
+  } catch (error) {
+    console.error('Reject collector application error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 module.exports = router;

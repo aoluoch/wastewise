@@ -270,6 +270,11 @@ const AdminReports: React.FC = () => {
                         <div className="text-xs text-gray-400 dark:text-gray-500">
                           {report.location.address}
                         </div>
+                        {(report.county || report.constituency) && (
+                          <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                            📍 {report.county}{report.constituency && `, ${report.constituency}`}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>

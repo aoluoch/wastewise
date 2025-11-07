@@ -7,6 +7,7 @@ import { validators } from '../../utils/validators'
 import { useMap } from '../../hooks/useMap'
 import { useToast } from '../../context/ToastContext'
 import { reportsApi } from '../../api/reportsApi'
+import { KENYAN_COUNTIES, getConstituenciesByCounty } from '../../data/kenyanLocations'
 
 const ReportForm: React.FC = () => {
   const navigate = useNavigate()
@@ -17,11 +18,14 @@ const ReportForm: React.FC = () => {
     estimatedVolume: '',
     notes: '',
     priority: 'medium',
+    county: '',
+    constituency: '',
   })
   const [images, setImages] = useState<File[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState<string>('')
+  const [availableConstituencies, setAvailableConstituencies] = useState<string[]>([])
 
   const { selectedLocation, handleMapClick, getCurrentLocation, setSelectedLocation } = useMap({
     onLocationChange: () => {
@@ -32,6 +36,14 @@ const ReportForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // When county changes, update available constituencies
+    if (name === 'county') {
+      const constituencies = getConstituenciesByCounty(value)
+      setAvailableConstituencies(constituencies)
+      // Reset constituency when county changes
+      setFormData(prev => ({ ...prev, constituency: '' }))
+    }
     
     // Clear error when user starts typing
     if (errors[name]) {
@@ -76,6 +88,12 @@ const ReportForm: React.FC = () => {
 
     const volumeError = validators.required(formData.estimatedVolume)
     if (volumeError) newErrors.estimatedVolume = volumeError
+
+    const countyError = validators.required(formData.county)
+    if (countyError) newErrors.county = 'County is required'
+
+    const constituencyError = validators.required(formData.constituency)
+    if (constituencyError) newErrors.constituency = 'Constituency is required'
 
     if (!selectedLocation) {
       newErrors.location = 'Please select a location on the map'
@@ -128,6 +146,8 @@ const ReportForm: React.FC = () => {
       
       formDataToSend.append('estimatedVolume', formData.estimatedVolume)
       formDataToSend.append('priority', formData.priority)
+      formDataToSend.append('county', formData.county)
+      formDataToSend.append('constituency', formData.constituency)
       if (formData.notes) {
         formDataToSend.append('notes', formData.notes)
       }
@@ -244,6 +264,61 @@ const ReportForm: React.FC = () => {
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description}</p>
             )}
+          </div>
+
+          {/* County and Constituency */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                County *
+              </label>
+              <select
+                name="county"
+                value={formData.county}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                  errors.county ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select county</option>
+                {KENYAN_COUNTIES.map(county => (
+                  <option key={county.name} value={county.name}>
+                    {county.name}
+                  </option>
+                ))}
+              </select>
+              {errors.county && (
+                <p className="mt-1 text-sm text-red-600">{errors.county}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Constituency *
+              </label>
+              <select
+                name="constituency"
+                value={formData.constituency}
+                onChange={handleChange}
+                disabled={!formData.county}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                  errors.constituency ? 'border-red-500' : 'border-gray-300'
+                } ${!formData.county ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <option value="">Select constituency</option>
+                {availableConstituencies.map(constituency => (
+                  <option key={constituency} value={constituency}>
+                    {constituency}
+                  </option>
+                ))}
+              </select>
+              {errors.constituency && (
+                <p className="mt-1 text-sm text-red-600">{errors.constituency}</p>
+              )}
+              {!formData.county && (
+                <p className="mt-1 text-sm text-gray-500">Please select a county first</p>
+              )}
+            </div>
           </div>
 
           {/* Volume and Priority */}

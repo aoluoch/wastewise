@@ -88,6 +88,18 @@ router.post('/', [
     .optional()
     .isIn(['low', 'medium', 'high', 'urgent'])
     .withMessage('Invalid priority level'),
+  body('county')
+    .trim()
+    .notEmpty()
+    .withMessage('County is required')
+    .isLength({ max: 100 })
+    .withMessage('County cannot exceed 100 characters'),
+  body('constituency')
+    .trim()
+    .notEmpty()
+    .withMessage('Constituency is required')
+    .isLength({ max: 100 })
+    .withMessage('Constituency cannot exceed 100 characters'),
   validate
 ], async (req, res) => {
   try {
@@ -103,7 +115,7 @@ router.post('/', [
       });
     }
 
-    const { type, description, location: locationString, estimatedVolume, notes, priority } = req.body;
+    const { type, description, location: locationString, estimatedVolume, notes, priority, county, constituency } = req.body;
     
     // Parse location JSON
     const location = JSON.parse(locationString);
@@ -145,6 +157,8 @@ router.post('/', [
           lng: parseFloat(location.coordinates.lng)
         }
       },
+      county,
+      constituency,
       images,
       estimatedVolume: parseFloat(estimatedVolume),
       notes,

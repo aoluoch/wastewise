@@ -71,6 +71,19 @@ const userSchema = new mongoose.Schema({
     match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   address: addressSchema,
+  county: {
+    type: String,
+    trim: true
+  },
+  constituency: {
+    type: String,
+    trim: true
+  },
+  collectorApplicationStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none'
+  },
   isActive: {
     type: Boolean,
     default: true

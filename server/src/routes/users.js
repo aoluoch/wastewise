@@ -315,4 +315,63 @@ router.get('/stats', [
   }
 });
 
+// @route   POST /api/users/apply-for-collector
+// @desc    Apply to become a collector
+// @access  Private (Resident)
+router.post('/apply-for-collector', [
+  authorize('resident'),
+  validate
+], async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if already a collector
+    if (user.role === 'collector') {
+      return res.status(400).json({
+        success: false,
+        message: 'You are already a collector'
+      });
+    }
+
+    // Check if already applied
+    if (user.collectorApplicationStatus === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Your application is already pending review'
+      });
+    }
+
+    // Check if already approved
+    if (user.collectorApplicationStatus === 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: 'Your application has already been approved'
+      });
+    }
+
+    // Update application status
+    user.collectorApplicationStatus = 'pending';
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Application submitted successfully',
+      data: { user }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 module.exports = router;

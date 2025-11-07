@@ -8,6 +8,7 @@ export interface User {
   phone?: string
   address?: Address
   isActive: boolean
+  collectorApplicationStatus?: 'none' | 'pending' | 'approved' | 'rejected'
   createdAt: string
   updatedAt: string
 }

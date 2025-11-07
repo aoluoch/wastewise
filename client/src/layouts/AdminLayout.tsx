@@ -16,6 +16,7 @@ const AdminLayout: React.FC = () => {
     { name: 'Reports', href: '/admin/reports', icon: '📋' },
     { name: 'Task Assignment', href: '/admin/assignments', icon: '👷' },
     { name: 'Users', href: '/admin/users', icon: '👥' },
+    { name: 'Applications', href: '/admin/applications', icon: '📝' },
     { name: 'Analytics', href: '/admin/analytics', icon: '📈' },
   ]
 

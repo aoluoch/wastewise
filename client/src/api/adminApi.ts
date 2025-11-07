@@ -18,6 +18,8 @@ export interface AdminReport {
     address: string
     coordinates: [number, number]
   }
+  county?: string
+  constituency?: string
   userId: {
     _id: string
     firstName: string
