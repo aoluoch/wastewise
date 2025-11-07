@@ -7,6 +7,7 @@ const User = require('../models/User');
 const { generateToken, generateRefreshToken, authMiddleware } = require('../middlewares/auth');
 const { validate } = require('../middlewares/validate');
 const { aj } = require('../services/arcjet');
+const { authLimiter, passwordResetLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 

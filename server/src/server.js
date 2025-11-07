@@ -4,7 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
@@ -25,6 +24,14 @@ const messagesRoutes = require('./routes/messages');
 // Import middleware
 const errorHandler = require('./middlewares/errorHandler');
 const { setupSocketHandlers } = require('./services/socketService');
+const { 
+  generalLimiter, 
+  authLimiter, 
+  passwordResetLimiter,
+  readLimiter,
+  writeLimiter,
+  docsLimiter 
+} = require('./middlewares/rateLimiter');
 
 const app = express();
 const server = createServer(app);
@@ -46,20 +53,31 @@ const io = new Server(server, {
 app.use(helmet());
 app.use(compression());
 
-// Rate limiting - disabled in development for better developer experience
+// Rate limiting - Applied in production for scalability and security
 if (process.env.NODE_ENV === 'production') {
-  const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // 100 requests per window in production
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  });
+  console.log('✓ Rate limiting enabled for production - Application is now scalable');
   
-  app.use('/api/', limiter);
-  console.log('Rate limiting enabled for production');
+  // Apply general rate limiter to all API routes as a baseline
+  app.use('/api/', generalLimiter);
+  
+  // Apply specific rate limiters to authentication endpoints
+  app.use('/api/auth/login', authLimiter);
+  app.use('/api/auth/register', authLimiter);
+  
+  // Apply password reset rate limiter
+  app.use('/api/auth/forgot-password', passwordResetLimiter);
+  app.use('/api/auth/reset-password', passwordResetLimiter);
+  
+  // Apply docs rate limiter
+  app.use('/api-docs', docsLimiter);
+  
+  console.log('✓ Endpoint-specific rate limits configured:');
+  console.log('  - Auth endpoints: 5 attempts per 15 minutes');
+  console.log('  - Password reset: 3 attempts per hour');
+  console.log('  - General API: 100 requests per 15 minutes');
+  console.log('  - API Docs: 30 requests per 15 minutes');
 } else {
-  console.log('Rate limiting disabled for development');
+  console.log('⚠ Rate limiting disabled for development (will be enabled in production)');
 }
 
 // CORS configuration

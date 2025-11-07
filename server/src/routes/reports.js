@@ -7,6 +7,7 @@ const { authMiddleware, authorize } = require('../middlewares/auth');
 const { validate } = require('../middlewares/validate');
 const { uploadMultiple, deleteImages, extractPublicId } = require('../services/cloudinaryService');
 const { verifyImagesAreWaste } = require('../services/aiImageVerifier');
+const { uploadLimiter, writeLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 // @desc    Create a new waste report
 // @access  Private
 router.post('/', [
+  uploadLimiter, // Apply upload rate limiter for image uploads
   uploadMultiple,
   // Multer error handler
   (err, req, res, next) => {

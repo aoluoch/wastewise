@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { authMiddleware, authorize } = require('../middlewares/auth');
 const { validate } = require('../middlewares/validate');
+const { writeLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
