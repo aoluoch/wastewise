@@ -126,6 +126,11 @@ Content-Type: application/json
 ```http
 POST /api/auth/logout
 Authorization: Bearer TOKEN
+Content-Type: application/json
+
+{
+  "refreshToken": "your_refresh_token"
+}
 ```
 
 #### Forgot Password
@@ -214,7 +219,7 @@ Authorization: Bearer TOKEN
 
 #### Create Pickup Task (Admin Only)
 ```http
-POST /api/pickups/tasks
+POST /api/pickups
 Authorization: Bearer ADMIN_TOKEN
 Content-Type: application/json
 
@@ -227,10 +232,10 @@ Content-Type: application/json
 }
 ```
 
-#### Get All Pickup Tasks (Admin)
+#### Get Pickup Tasks
 ```http
-GET /api/pickups/tasks?page=1&limit=10&status=scheduled
-Authorization: Bearer ADMIN_TOKEN
+GET /api/pickups?page=1&limit=10&status=scheduled
+Authorization: Bearer TOKEN
 ```
 
 #### Get Collector's Tasks
@@ -265,7 +270,7 @@ Content-Type: application/json
 
 #### Cancel Pickup Task
 ```http
-POST /api/pickups/tasks/:id/cancel
+PATCH /api/pickups/:id/cancel
 Authorization: Bearer TOKEN
 Content-Type: application/json
 
@@ -281,7 +286,8 @@ Authorization: Bearer TOKEN
 Content-Type: application/json
 
 {
-  "scheduledDate": "2024-12-02T10:00:00Z"
+  "scheduledDate": "2024-12-02T10:00:00Z",
+  "reason": "Optional reason"
 }
 ```
 
@@ -469,40 +475,27 @@ Authorization: Bearer ADMIN_TOKEN
 
 #### Get Room Messages
 ```http
-GET /api/messages/rooms/:room/messages?page=1&limit=50
+GET /api/messages?room=room_name&page=1&limit=50
 Authorization: Bearer TOKEN
-```
-
-#### Send Message
-```http
-POST /api/messages/send
-Authorization: Bearer TOKEN
-Content-Type: application/json
-
-{
-  "room": "room_id",
-  "message": "Hello!",
-  "type": "text"
-}
 ```
 
 ### Statistics
 
-#### Get Dashboard Statistics
+#### Get Resident Dashboard Statistics
 ```http
-GET /api/statistics/dashboard
+GET /api/statistics/resident
 Authorization: Bearer TOKEN
 ```
 
 #### Get Report Statistics (Admin)
 ```http
-GET /api/statistics/reports?period=month
+GET /api/admin/analytics/reports?startDate=2024-01-01&endDate=2024-12-31
 Authorization: Bearer ADMIN_TOKEN
 ```
 
-#### Get Collector Statistics (Admin)
+#### Get User Analytics (Admin)
 ```http
-GET /api/statistics/collectors
+GET /api/admin/analytics/users?startDate=2024-01-01&endDate=2024-12-31
 Authorization: Bearer ADMIN_TOKEN
 ```
 
@@ -578,11 +571,28 @@ The API also supports real-time communication via Socket.io:
 
 ### Server Events
 - `new_message` - New message received
-- `task_assigned` - New task assigned to collector
-- `task_update` - Task status updated
-- `report_update` - Report status updated
-- `emergency_alert` - Emergency notification
-- `system_notification` - System notification
+- `assign_task` - New task assigned to collector
+- `task_update` - Task or report status updated
+- `new_report` - New report created
+- `report_deleted` - Report deleted
+- `application_approved` - Collector application approved
+- `application_rejected` - Collector application rejected
+- `new_notification` - New notification created
+- `collector_location_update` - Collector location update for a task
+
+### User Management
+
+#### Apply to Become a Collector (Resident)
+```http
+POST /api/users/apply-for-collector
+Authorization: Bearer RESIDENT_TOKEN
+Content-Type: application/json
+
+{
+  "county": "Nairobi",
+  "constituency": "Westlands"
+}
+```
 
 ## Testing
 

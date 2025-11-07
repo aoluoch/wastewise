@@ -2,8 +2,6 @@
 
 A comprehensive waste management application that connects residents, collectors, and administrators to create a cleaner, more efficient waste collection system.
 
-![Wastewise Logo](https://via.placeholder.com/200x80/2E7D32/FFFFFF?text=Wastewise)
-
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -57,7 +55,7 @@ Wastewise is a modern waste management platform that leverages technology to str
 - **Smart Reporting**: Create detailed waste reports with photos
 - **Location Services**: GPS-based location tracking with county and constituency data
 - **Geographic Filtering**: Filter and search reports by administrative boundaries
-- **AI Classification**: Automatic waste type detection using TensorFlow.js
+- **Map Search**: Integrated Mapbox search for quick location selection
 - **Priority System**: Urgent, high, medium, low priority levels
 - **Real-time Updates**: Live status updates and notifications
 
@@ -98,9 +96,8 @@ Wastewise is a modern waste management platform that leverages technology to str
 - **React Router** - Client-side routing
 - **Socket.io Client** - Real-time communication
 - **React Query** - Server state management
-- **React Hook Form** - Form handling and validation
-- **Leaflet** - Interactive maps
-- **Chart.js** - Data visualization
+- **Mapbox GL JS** - Interactive maps and geocoding search
+- **Recharts** - Data visualization
 
 ### Backend
 - **Node.js** - JavaScript runtime
@@ -241,14 +238,14 @@ Wastewise/
    EMAIL_FROM=noreply@wastewise.com
    
    # Socket.io
-   SOCKET_CORS_ORIGIN=http://localhost:3000
+   SOCKET_CORS_ORIGIN=http://localhost:5173
    ```
    
    **Frontend (client/.env)**
    ```env
-   VITE_API_URL=http://localhost:5000/api
+   VITE_API_BASE_URL=http://localhost:5000
    VITE_SOCKET_URL=http://localhost:5000
-   VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+   VITE_MAPBOX_TOKEN=your_mapbox_token_here
    ```
 
 5. **Start MongoDB**
@@ -268,7 +265,7 @@ Wastewise/
    ```
 
 7. **Access the application**
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:5000
    - API Health Check: http://localhost:5000/health
    - **API Documentation (Swagger)**: http://localhost:5000/api-docs
@@ -510,9 +507,8 @@ The frontend is built with React and TypeScript, following modern best practices
 
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 - **Real-time Updates**: Socket.io integration for live updates
-- **Form Handling**: React Hook Form with validation
 - **State Management**: React Query for server state
-- **Maps Integration**: Leaflet for interactive maps
+- **Maps Integration**: Mapbox GL JS for interactive maps and search
 - **Image Upload**: Cloudinary integration
 
 ### Development Commands
