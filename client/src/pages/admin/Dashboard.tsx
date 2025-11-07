@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminApi, DashboardStats } from '../../api/adminApi'
 import { useToast } from '../../context/ToastContext'
+import { axiosInstance } from '../../api/axiosInstance'
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [pendingApplications, setPendingApplications] = useState(0)
   const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -21,7 +23,17 @@ const AdminDashboard: React.FC = () => {
       }
     }
 
+    const fetchApplications = async () => {
+      try {
+        const response = await axiosInstance.get('/admin/collector-applications')
+        setPendingApplications(response.data.data.applications.length)
+      } catch {
+        // Silently fail - not critical
+      }
+    }
+
     fetchStats()
+    fetchApplications()
   }, [showToast])
 
   if (loading) {
@@ -183,7 +195,7 @@ const AdminDashboard: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button 
             onClick={() => navigate('/admin/reports')}
             className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -199,6 +211,19 @@ const AdminDashboard: React.FC = () => {
             <div className="text-2xl mb-2">👥</div>
             <div className="font-medium text-gray-900 dark:text-white">Manage Users</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">View and manage users</div>
+          </button>
+          <button 
+            onClick={() => navigate('/admin/applications')}
+            className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 relative"
+          >
+            <div className="text-2xl mb-2">📝</div>
+            <div className="font-medium text-gray-900 dark:text-white">Collector Applications</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Review applications</div>
+            {pendingApplications > 0 && (
+              <span className="absolute top-2 right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                {pendingApplications}
+              </span>
+            )}
           </button>
           <button 
             onClick={() => navigate('/admin/analytics')}
