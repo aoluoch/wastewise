@@ -17,6 +17,7 @@ type AuthAction =
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_USER'; payload: Partial<AuthUser> }
 
 const initialState: AuthState = {
   user: null,
@@ -65,6 +66,10 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return { ...state, error: null }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
+    case 'SET_USER': {
+      const mergedUser = state.user ? { ...state.user, ...action.payload } : (action.payload as unknown as AuthUser)
+      return { ...state, user: mergedUser }
+    }
     default:
       return state
   }
@@ -76,6 +81,7 @@ interface AuthContextType extends AuthState {
   logout: () => void
   clearError: () => void
   refreshToken: () => Promise<void>
+  updateUser: (partial: Partial<AuthUser>) => void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -177,6 +183,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const updateUser = (partial: Partial<AuthUser>) => {
+    dispatch({ type: 'SET_USER', payload: partial })
+  }
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -184,6 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     clearError,
     refreshToken,
+    updateUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
