@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useToast } from '../../context/ToastContext'
+import { axiosInstance } from '../../api/axiosInstance'
 
 interface Report {
   _id: string
@@ -76,38 +77,28 @@ const TaskAssignment: React.FC = () => {
   // Fetch pending reports
   const fetchPendingReports = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/pending-reports?page=${currentPage}&limit=10`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await axiosInstance.get('/admin/pending-reports', {
+        params: { page: currentPage, limit: 10 },
       })
+      const data = response.data
 
-      const data = await response.json()
-
-      // Handle both success and error responses
-      if (response.ok && data.success) {
-        setReports(data.data.reports || [])
-        setTotalPages(data.data.pagination?.totalPages || 1)
+      if (data?.success) {
+        setReports(data.data?.reports || [])
+        setTotalPages(data.data?.pagination?.totalPages || 1)
       } else {
-        // Only show error toast for actual errors, not empty results
-        if (response.status !== 404 && response.status !== 200) {
-          showToast({
-            type: 'error',
-            title: 'Error',
-            message: data.message || 'Failed to load pending reports'
-          })
-        }
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: data?.message || 'Failed to load pending reports'
+        })
         setReports([])
         setTotalPages(1)
       }
-    } catch {
-      // Only show error for network/connection issues
+    } catch (error: any) {
       showToast({
         type: 'error',
         title: 'Connection Error',
-        message: 'Unable to connect to server. Please check your connection.'
+        message: error?.message || 'Unable to connect to server. Please check your connection.'
       })
       setReports([])
       setTotalPages(1)
@@ -117,26 +108,16 @@ const TaskAssignment: React.FC = () => {
   // Fetch active collectors
   const fetchCollectors = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/collectors', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch collectors')
-      }
-
-      const data = await response.json()
-      setCollectors(data.data)
-    } catch {
+      const response = await axiosInstance.get('/admin/collectors')
+      const data = response.data
+      setCollectors(data?.data || [])
+    } catch (error: any) {
       showToast({
         type: 'error',
         title: 'Error',
-        message: 'Failed to load collectors'
+        message: error?.message || 'Failed to load collectors'
       })
+      setCollectors([])
     }
   }, [showToast])
 
@@ -172,26 +153,13 @@ const TaskAssignment: React.FC = () => {
 
     setAssigning(selectedReport._id)
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/assign-collector', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          reportId: selectedReport._id,
-          collectorId: formData.collectorId,
-          scheduledDate: formData.scheduledDate,
-          estimatedDuration: formData.estimatedDuration,
-          notes: formData.notes
-        })
+      await axiosInstance.post('/admin/assign-collector', {
+        reportId: selectedReport._id,
+        collectorId: formData.collectorId,
+        scheduledDate: formData.scheduledDate,
+        estimatedDuration: formData.estimatedDuration,
+        notes: formData.notes
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to assign collector')
-      }
 
       showToast({
         type: 'success',
@@ -202,11 +170,11 @@ const TaskAssignment: React.FC = () => {
       setShowAssignmentModal(false)
       setSelectedReport(null)
       fetchPendingReports() // Refresh the list
-    } catch (error) {
+    } catch (error: any) {
       showToast({
         type: 'error',
         title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to assign collector'
+        message: error?.message || 'Failed to assign collector'
       })
     } finally {
       setAssigning(null)
