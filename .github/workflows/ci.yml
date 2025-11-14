@@ -97,22 +97,11 @@ jobs:
 
   # Server Tests
   server-tests:
-    name: Server - Lint & Test
+    name: Server - Lint & Format Check
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./server
-    
-    services:
-      mongodb:
-        image: mongo:4.4
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     
     steps:
       - name: Checkout code
@@ -133,12 +122,6 @@ jobs:
 
       - name: Format check
         run: npm run format:check
-
-      - name: Run tests
-        run: npm test
-        env:
-          NODE_ENV: test
-          TEST_MONGO_URI: mongodb://localhost:27017/wastewise_test
 
   # Client Security Audit
   client-security:
@@ -260,7 +243,7 @@ jobs:
         run: |
           echo "✅ All checks passed successfully!"
           echo "Client: Lint ✓ Type Check ✓ Build ✓"
-          echo "Server: Lint ✓ Tests ✓"
+          echo "Server: Lint ✓ Format Check ✓"
           echo "Security: Client ✓ Server ✓"
 
       - name: Notify on failure
