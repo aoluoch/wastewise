@@ -18,6 +18,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/me` - Get current user
@@ -25,6 +26,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `POST /api/auth/logout` - Logout user
 
 ### Users (Admin only)
+
 - `GET /api/users` - List all users with pagination and filtering
 - `GET /api/users/:id` - Get user by ID
 - `PATCH /api/users/:id` - Update user
@@ -33,6 +35,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `GET /api/users/stats` - Get user statistics
 
 ### Waste Reports
+
 - `POST /api/reports` - Create a new waste report (with image upload)
 - `GET /api/reports` - List reports with filtering and pagination
 - `GET /api/reports/:id` - Get single report
@@ -41,6 +44,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `GET /api/reports/nearby` - Get reports near a location
 
 ### Pickups
+
 - `POST /api/pickups` - Schedule pickup task (admin only)
 - `GET /api/pickups` - List pickup tasks with filtering
 - `GET /api/pickups/:id` - Get single pickup task
@@ -50,6 +54,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `GET /api/pickups/collector/:collectorId/schedule` - Get collector's schedule
 
 ### Notifications
+
 - `GET /api/notifications` - Get user notifications
 - `GET /api/notifications/unread-count` - Get unread count
 - `PATCH /api/notifications/:id/read` - Mark notification as read
@@ -58,45 +63,50 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `POST /api/notifications/send` - Send notification (admin only)
 
 ### Dashboard & Analytics
+
 - `GET /api/dashboard/stats` - Get dashboard statistics
 - `GET /api/analytics` - Get analytics data
 
 ## Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd Wastewise/server
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Setup**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Update the `.env` file with your configuration:
+
    ```env
    # Database
    MONGODB_URI=mongodb://localhost:27017/wastewise
-   
+
    # JWT
    JWT_SECRET=your-super-secret-jwt-key-here
    JWT_REFRESH_SECRET=your-super-secret-refresh-key-here
-   
+
    # Server
    PORT=5000
    NODE_ENV=development
-   
+
    # Cloudinary
    CLOUDINARY_CLOUD_NAME=your-cloud-name
    CLOUDINARY_API_KEY=your-api-key
    CLOUDINARY_API_SECRET=your-api-secret
-   
+
    # Email
    EMAIL_HOST=smtp.gmail.com
    EMAIL_PORT=587
@@ -105,10 +115,11 @@ A comprehensive Express.js backend server for the Wastewise waste management app
    ```
 
 4. **Start the server**
+
    ```bash
    # Development
    npm run dev
-   
+
    # Production
    npm start
    ```
@@ -116,24 +127,28 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 ## Database Models
 
 ### User
+
 - Authentication and user profile information
 - Role-based access (admin, collector, resident)
 - Address and location data
 - Refresh token management
 
 ### WasteReport
+
 - Waste report details with location
 - Image storage via Cloudinary
 - Status tracking and assignment
 - AI classification support
 
 ### PickupTask
+
 - Pickup scheduling and management
 - Time tracking and completion
 - Collector assignment
 - Status updates
 
 ### Notification
+
 - In-app notification system
 - Email integration
 - Priority and expiration handling
@@ -142,6 +157,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 ## Socket.io Events
 
 ### Client to Server
+
 - `join_room` - Join a specific room
 - `leave_room` - Leave a room
 - `send_message` - Send chat message
@@ -152,6 +168,7 @@ A comprehensive Express.js backend server for the Wastewise waste management app
 - `emergency_alert` - Send emergency alert
 
 ### Server to Client
+
 - `new_report` - New waste report created
 - `assign_task` - Task assigned to collector
 - `task_update` - Task status updated

@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer')
 
 // Create email transporter
 const createTransporter = () => {
@@ -8,17 +8,17 @@ const createTransporter = () => {
     secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      pass: process.env.EMAIL_PASS,
     },
     tls: {
-      rejectUnauthorized: false
-    }
-  });
-};
+      rejectUnauthorized: false,
+    },
+  })
+}
 
 // Email templates
 const emailTemplates = {
-  welcome: (user) => ({
+  welcome: user => ({
     subject: 'Welcome to Wastewise!',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -35,7 +35,7 @@ const emailTemplates = {
         <p>If you have any questions, feel free to contact our support team.</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
+    `,
   }),
 
   reportCreated: (user, report) => ({
@@ -57,7 +57,7 @@ const emailTemplates = {
         <p>Thank you for helping keep our community clean!</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
+    `,
   }),
 
   pickupScheduled: (user, pickupTask) => ({
@@ -77,7 +77,7 @@ const emailTemplates = {
         <p>Please ensure your waste is accessible at the scheduled time.</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
+    `,
   }),
 
   pickupCompleted: (user, pickupTask) => ({
@@ -96,7 +96,7 @@ const emailTemplates = {
         <p>Thank you for using Wastewise! Your contribution helps keep our community clean.</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
+    `,
   }),
 
   passwordReset: (user, resetToken) => ({
@@ -117,7 +117,7 @@ const emailTemplates = {
         <p>If you didn't request this password reset, please ignore this email.</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
+    `,
   }),
 
   systemAlert: (user, alert) => ({
@@ -133,104 +133,104 @@ const emailTemplates = {
         <p>Please take appropriate action if required.</p>
         <p>Best regards,<br>The Wastewise Team</p>
       </div>
-    `
-  })
-};
+    `,
+  }),
+}
 
 // Send email function
 const sendEmail = async (to, templateName, templateData) => {
   try {
-    const transporter = createTransporter();
+    const transporter = createTransporter()
     try {
-      await transporter.verify();
-      console.log('SMTP transporter verified');
+      await transporter.verify()
+      console.log('SMTP transporter verified')
     } catch (verifyError) {
-      console.error('SMTP verify failed:', verifyError);
-      throw verifyError;
+      console.error('SMTP verify failed:', verifyError)
+      throw verifyError
     }
-    const template = emailTemplates[templateName];
-    
+    const template = emailTemplates[templateName]
+
     if (!template) {
-      throw new Error(`Email template '${templateName}' not found`);
+      throw new Error(`Email template '${templateName}' not found`)
     }
 
-    const emailContent = template(templateData);
+    const emailContent = template(templateData)
 
     const fromAddress = process.env.EMAIL_FROM || 'Wastewise <noreply@wastewise.local>'
     const mailOptions = {
       from: fromAddress,
       to,
       subject: emailContent.subject,
-      html: emailContent.html
-    };
+      html: emailContent.html,
+    }
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
-    return result;
+    const result = await transporter.sendMail(mailOptions)
+    console.log('Email sent successfully:', result.messageId)
+    return result
   } catch (error) {
     console.error('Email sending failed:', {
       message: error && error.message,
       code: error && error.code,
       command: error && error.command,
       response: error && error.response,
-      responseCode: error && error.responseCode
-    });
-    throw error;
+      responseCode: error && error.responseCode,
+    })
+    throw error
   }
-};
+}
 
 // Send bulk emails
 const sendBulkEmails = async (recipients, templateName, templateData) => {
   try {
-    const transporter = createTransporter();
+    const transporter = createTransporter()
     try {
-      await transporter.verify();
-      console.log('SMTP transporter verified');
+      await transporter.verify()
+      console.log('SMTP transporter verified')
     } catch (verifyError) {
-      console.error('SMTP verify failed:', verifyError);
-      throw verifyError;
+      console.error('SMTP verify failed:', verifyError)
+      throw verifyError
     }
-    const template = emailTemplates[templateName];
-    
+    const template = emailTemplates[templateName]
+
     if (!template) {
-      throw new Error(`Email template '${templateName}' not found`);
+      throw new Error(`Email template '${templateName}' not found`)
     }
 
-    const emailContent = template(templateData);
+    const emailContent = template(templateData)
 
     const fromAddress = process.env.EMAIL_FROM || 'Wastewise <noreply@wastewise.local>'
     const mailOptions = {
       from: fromAddress,
       to: recipients.join(', '),
       subject: emailContent.subject,
-      html: emailContent.html
-    };
+      html: emailContent.html,
+    }
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Bulk email sent successfully:', result.messageId);
-    return result;
+    const result = await transporter.sendMail(mailOptions)
+    console.log('Bulk email sent successfully:', result.messageId)
+    return result
   } catch (error) {
     console.error('Bulk email sending failed:', {
       message: error && error.message,
       code: error && error.code,
       command: error && error.command,
       response: error && error.response,
-      responseCode: error && error.responseCode
-    });
-    throw error;
+      responseCode: error && error.responseCode,
+    })
+    throw error
   }
-};
+}
 
 // Send custom email
 const sendCustomEmail = async (to, subject, html) => {
   try {
-    const transporter = createTransporter();
+    const transporter = createTransporter()
     try {
-      await transporter.verify();
-      console.log('SMTP transporter verified');
+      await transporter.verify()
+      console.log('SMTP transporter verified')
     } catch (verifyError) {
-      console.error('SMTP verify failed:', verifyError);
-      throw verifyError;
+      console.error('SMTP verify failed:', verifyError)
+      throw verifyError
     }
 
     const fromAddress = process.env.EMAIL_FROM || 'Wastewise <noreply@wastewise.local>'
@@ -238,41 +238,41 @@ const sendCustomEmail = async (to, subject, html) => {
       from: fromAddress,
       to,
       subject,
-      html
-    };
+      html,
+    }
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Custom email sent successfully:', result.messageId);
-    return result;
+    const result = await transporter.sendMail(mailOptions)
+    console.log('Custom email sent successfully:', result.messageId)
+    return result
   } catch (error) {
     console.error('Custom email sending failed:', {
       message: error && error.message,
       code: error && error.code,
       command: error && error.command,
       response: error && error.response,
-      responseCode: error && error.responseCode
-    });
-    throw error;
+      responseCode: error && error.responseCode,
+    })
+    throw error
   }
-};
+}
 
 // Verify email configuration
 const verifyEmailConfig = async () => {
   try {
-    const transporter = createTransporter();
-    await transporter.verify();
-    console.log('Email configuration verified successfully');
-    return true;
+    const transporter = createTransporter()
+    await transporter.verify()
+    console.log('Email configuration verified successfully')
+    return true
   } catch (error) {
-    console.error('Email configuration verification failed:', error);
-    return false;
+    console.error('Email configuration verification failed:', error)
+    return false
   }
-};
+}
 
 module.exports = {
   sendEmail,
   sendBulkEmails,
   sendCustomEmail,
   verifyEmailConfig,
-  emailTemplates
-};
+  emailTemplates,
+}

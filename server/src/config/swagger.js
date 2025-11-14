@@ -1,4 +1,4 @@
-const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerJsdoc = require('swagger-jsdoc')
 
 const options = {
   definition: {
@@ -104,7 +104,14 @@ const options = {
             },
             type: {
               type: 'string',
-              enum: ['household', 'recyclable', 'hazardous', 'electronic', 'organic', 'construction'],
+              enum: [
+                'household',
+                'recyclable',
+                'hazardous',
+                'electronic',
+                'organic',
+                'construction',
+              ],
               description: 'Type of waste',
             },
             description: {
@@ -312,8 +319,8 @@ const options = {
     ],
   },
   apis: ['./src/routes/*.js', './src/controllers/*.js', './src/docs/*.js'],
-};
+}
 
-const swaggerSpec = swaggerJsdoc(options);
+const swaggerSpec = swaggerJsdoc(options)
 
-module.exports = swaggerSpec;
+module.exports = swaggerSpec
