@@ -1,18 +1,54 @@
 const request = require('supertest')
-const { app } = require('./src/server')
+const path = require('path')
+
+// Set required env vars for tests before importing the app
+process.env.NODE_ENV = process.env.NODE_ENV || 'test'
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret'
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test_refresh_secret'
+// Ensure mongodb-memory-server uses an older binary and caches it locally
+process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '4.4.24'
+process.env.MONGOMS_DOWNLOAD_DIR =
+  process.env.MONGOMS_DOWNLOAD_DIR || path.resolve(__dirname, '../../.cache/mongodb-binaries')
+
+// Increase default Jest timeout for async DB ops (first MongoDB binary download can be slow)
+jest.setTimeout(300000)
+
+const { MongoMemoryServer } = require('mongodb-memory-server')
+let mongoServer
+
+const { app } = require('../server')
 const mongoose = require('mongoose')
-const User = require('./src/models/User')
+const User = require('../models/User')
+const useExternalMongo = !!process.env.TEST_MONGO_URI
 
 describe('Wastewise API Tests', () => {
   beforeAll(async () => {
-    // Connect to test database
-    await mongoose.connect('mongodb://localhost:27017/wastewise_test')
+    // Use external MongoDB if provided, otherwise start in-memory server
+    if (useExternalMongo) {
+      await mongoose.connect(process.env.TEST_MONGO_URI, { dbName: 'wastewise_test' })
+    } else {
+      mongoServer = await MongoMemoryServer.create({
+        // Use MongoDB 4.4.x which does not require AVX (fixes SIGILL on older CPUs)
+        binary: { version: process.env.MONGOMS_VERSION || '4.4.24' },
+      })
+      const uri = mongoServer.getUri()
+      await mongoose.connect(uri, { dbName: 'wastewise_test' })
+    }
   })
 
   afterAll(async () => {
     // Clean up and disconnect
-    await mongoose.connection.db.dropDatabase()
-    await mongoose.connection.close()
+    try {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.db.dropDatabase()
+      }
+    } catch (_) {}
+    try {
+      await mongoose.connection.close()
+    } catch (_) {}
+    if (mongoServer) {
+      await mongoServer.stop()
+    }
   })
 
   describe('Health Check', () => {
