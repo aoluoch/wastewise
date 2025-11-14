@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const WasteReport = require('../models/WasteReport');
 const PickupTask = require('../models/PickupTask');
-const Notification = require('../models/Notification');
 
 // Dashboard statistics for different user roles
 const getDashboardStats = async (req, res) => {

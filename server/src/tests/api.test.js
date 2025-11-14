@@ -82,7 +82,6 @@ describe('Wastewise API Tests', () => {
 
   describe('Protected Routes', () => {
     let authToken;
-    let userId;
 
     beforeAll(async () => {
       // Create a user and get auth token
@@ -98,7 +97,6 @@ describe('Wastewise API Tests', () => {
         .send(userData);
 
       authToken = registerResponse.body.data.token;
-      userId = registerResponse.body.data.user.id;
     });
 
     test('GET /api/auth/me should return user info with valid token', async () => {
@@ -123,7 +121,6 @@ describe('Wastewise API Tests', () => {
 
   describe('User Management', () => {
     let adminToken;
-    let adminId;
 
     beforeAll(async () => {
       // Create an admin user
@@ -146,7 +143,6 @@ describe('Wastewise API Tests', () => {
         });
 
       adminToken = loginResponse.body.data.token;
-      adminId = admin._id;
     });
 
     test('GET /api/users should return users list for admin', async () => {

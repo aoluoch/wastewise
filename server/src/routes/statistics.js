@@ -1,6 +1,5 @@
 const express = require('express');
 const WasteReport = require('../models/WasteReport');
-const PickupTask = require('../models/PickupTask');
 const { authMiddleware, authorize } = require('../middlewares/auth');
 const { validate } = require('../middlewares/validate');
 

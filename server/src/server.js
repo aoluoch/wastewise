@@ -28,8 +28,6 @@ const {
   generalLimiter, 
   authLimiter, 
   passwordResetLimiter,
-  readLimiter,
-  writeLimiter,
   docsLimiter 
 } = require('./middlewares/rateLimiter');
 
@@ -100,7 +98,9 @@ const corsOriginCheck = allowedOrigins.length === 0 && process.env.NODE_ENV === 
     }
   : (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        return callback(null, true);
+      }
       
       if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
         callback(null, true);

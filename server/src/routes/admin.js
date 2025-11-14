@@ -342,9 +342,15 @@ router.get('/reports', [
 
     // Build filter object
     const filter = {};
-    if (status) filter.status = status;
-    if (type) filter.type = type;
-    if (priority) filter.priority = priority;
+    if (status) {
+      filter.status = status;
+    }
+    if (type) {
+      filter.type = type;
+    }
+    if (priority) {
+      filter.priority = priority;
+    }
     if (search) {
       filter.$or = [
         { description: { $regex: search, $options: 'i' } },
@@ -414,8 +420,12 @@ router.get('/users', [
 
     // Build filter object
     const filter = {};
-    if (role) filter.role = role;
-    if (status) filter.isActive = status === 'active';
+    if (role) {
+      filter.role = role;
+    }
+    if (status) {
+      filter.isActive = status === 'active';
+    }
     if (search) {
       filter.$or = [
         { firstName: { $regex: search, $options: 'i' } },
@@ -477,7 +487,9 @@ router.patch('/reports/:id/status', [
     }
 
     report.status = status;
-    if (notes) report.adminNotes = notes;
+    if (notes) {
+      report.adminNotes = notes;
+    }
     report.updatedAt = new Date();
 
     await report.save();
@@ -616,9 +628,15 @@ router.get('/export/reports', [
 
     // Build filter object
     const filter = {};
-    if (status) filter.status = status;
-    if (type) filter.type = type;
-    if (priority) filter.priority = priority;
+    if (status) {
+      filter.status = status;
+    }
+    if (type) {
+      filter.type = type;
+    }
+    if (priority) {
+      filter.priority = priority;
+    }
     if (search) {
       filter.$or = [
         { description: { $regex: search, $options: 'i' } },
@@ -964,8 +982,12 @@ router.get('/pickup-tasks', [
     const skip = (page - 1) * limit;
 
     const filter = {};
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.collectorId) filter.collectorId = req.query.collectorId;
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.collectorId) {
+      filter.collectorId = req.query.collectorId;
+    }
 
     const [pickupTasks, total] = await Promise.all([
       PickupTask.find(filter)

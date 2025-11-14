@@ -59,7 +59,9 @@ const setupSocketHandlers = (io) => {
     // Handle joining specific rooms with basic authorization
     socket.on('join_room', (roomName) => {
       try {
-        if (typeof roomName !== 'string' || !roomName) return;
+        if (typeof roomName !== 'string' || !roomName) {
+          return;
+        }
 
         // Allow joining own user room
         if (roomName === `user:${socket.user._id}`) {
@@ -86,7 +88,7 @@ const setupSocketHandlers = (io) => {
         if (roomName.startsWith('dm:')) {
           const parts = roomName.split(':');
           if (parts.length === 3) {
-            const [_, a, b] = parts;
+            const [, a, b] = parts;
             const sorted = [a, b].sort().join(':');
             const expected = `dm:${sorted}`;
             const selfId = socket.user._id.toString();

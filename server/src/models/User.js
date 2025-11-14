@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true,
-    match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
+    match: [/^[+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   address: addressSchema,
   county: {
@@ -125,7 +125,9 @@ userSchema.index({ 'address.coordinates': '2dsphere' });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) {
+    return next();
+  }
   
   try {
     const salt = await bcrypt.genSalt(12);

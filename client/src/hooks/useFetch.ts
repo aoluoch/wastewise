@@ -88,9 +88,8 @@ export function useMutation<TData, TVariables>(
       } finally {
         setLoading(false);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [mutationFn]
+    [mutationFn, options]
   );
 
   const reset = useCallback(() => {

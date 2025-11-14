@@ -7,7 +7,7 @@ const { authMiddleware, authorize } = require('../middlewares/auth');
 const { validate } = require('../middlewares/validate');
 const { uploadMultiple, deleteImages, extractPublicId } = require('../services/cloudinaryService');
 const { verifyImagesAreWaste } = require('../services/aiImageVerifier');
-const { uploadLimiter, writeLimiter } = require('../middlewares/rateLimiter');
+const { uploadLimiter } = require('../middlewares/rateLimiter');
 
 const router = express.Router();
 
@@ -483,10 +483,18 @@ router.patch('/:id', [
     const oldStatus = report.status;
 
     // Update report
-    if (status) report.status = status;
-    if (priority) report.priority = priority;
-    if (assignedCollectorId) report.assignedCollectorId = assignedCollectorId;
-    if (notes) report.notes = notes;
+    if (status) {
+      report.status = status;
+    }
+    if (priority) {
+      report.priority = priority;
+    }
+    if (assignedCollectorId) {
+      report.assignedCollectorId = assignedCollectorId;
+    }
+    if (notes) {
+      report.notes = notes;
+    }
 
     if (status === 'completed') {
       report.completedAt = new Date();
