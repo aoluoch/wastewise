@@ -57,22 +57,25 @@ client/
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recommended) or npm
 
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 2. Copy environment variables:
+
 ```bash
 cp env.example .env.local
 ```
 
 3. Update environment variables in `.env.local`:
+
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api
 VITE_SOCKET_URL=http://localhost:3001
@@ -82,6 +85,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token_here
 ### Development
 
 Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -91,11 +95,13 @@ The app will be available at `http://localhost:3000`
 ### Build
 
 Build for production:
+
 ```bash
 pnpm build
 ```
 
 Preview production build:
+
 ```bash
 pnpm preview
 ```
@@ -103,18 +109,21 @@ pnpm preview
 ## Features by Role
 
 ### Resident
+
 - Report waste issues with photos and location
 - View pickup schedules
 - Track report status
 - Receive notifications
 
 ### Collector
+
 - View assigned tasks
 - Update task status
 - Chat with residents
 - Navigate to pickup locations
 
 ### Admin
+
 - Manage all reports
 - User management
 - Analytics dashboard
@@ -129,11 +138,11 @@ pnpm preview
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend API URL | `http://localhost:3000/api` |
-| `VITE_SOCKET_URL` | Socket.io server URL | `http://localhost:3001` |
-| `VITE_MAPBOX_TOKEN` | Mapbox access token | Required for maps |
+| Variable            | Description          | Default                     |
+| ------------------- | -------------------- | --------------------------- |
+| `VITE_API_BASE_URL` | Backend API URL      | `http://localhost:3000/api` |
+| `VITE_SOCKET_URL`   | Socket.io server URL | `http://localhost:3001`     |
+| `VITE_MAPBOX_TOKEN` | Mapbox access token  | Required for maps           |
 
 ## Contributing
 

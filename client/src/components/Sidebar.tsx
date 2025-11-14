@@ -1,39 +1,44 @@
-import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { cn } from '../utils/formatters'
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { cn } from '../utils/formatters';
 
 interface NavItem {
-  name: string
-  href: string
-  icon: string
+  name: string;
+  href: string;
+  icon: string;
 }
 
 interface SidebarProps {
-  isOpen: boolean
-  onClose: () => void
-  navItems: NavItem[]
-  currentPath: string
+  isOpen: boolean;
+  onClose: () => void;
+  navItems: NavItem[];
+  currentPath: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navItems, currentPath }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  onClose,
+  navItems,
+  currentPath,
+}) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   return (
     <>
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className='fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden'
           onClick={onClose}
         />
       )}
@@ -45,12 +50,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navItems, currentPat
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex flex-col h-full flex-shrink-0">
+        <div className='flex flex-col h-full flex-shrink-0'>
           {/* Navigation items */}
-          <nav className="flex-1 px-6 py-6 space-y-3 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = currentPath === item.href
-              
+          <nav className='flex-1 px-6 py-6 space-y-3 overflow-y-auto'>
+            {navItems.map(item => {
+              const isActive = currentPath === item.href;
+
               return (
                 <Link
                   key={item.name}
@@ -63,24 +68,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, navItems, currentPat
                       : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                   )}
                 >
-                  <span className="mr-4 text-lg">{item.icon}</span>
+                  <span className='mr-4 text-lg'>{item.icon}</span>
                   {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
 
           {/* Sidebar footer */}
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+          <div className='p-6 border-t border-gray-200 dark:border-gray-700'>
             <div className="text-xs text-gray-500 dark:text-gray-400 font-['Poppins']">
-              <p className="font-medium">WasteWise v1.0.0</p>
-              <p className="mt-1">© {new Date().getFullYear()} All rights reserved</p>
+              <p className='font-medium'>WasteWise v1.0.0</p>
+              <p className='mt-1'>
+                © {new Date().getFullYear()} All rights reserved
+              </p>
             </div>
           </div>
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

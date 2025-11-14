@@ -1,67 +1,67 @@
 export interface WasteReport {
-  id: string
-  _id: string // For MongoDB compatibility
-  userId: string
-  type: WasteType
-  description: string
+  id: string;
+  _id: string; // For MongoDB compatibility
+  userId: string;
+  type: WasteType;
+  description: string;
   location: {
-    address: string
+    address: string;
     coordinates: {
-      lat: number
-      lng: number
-    }
-  }
-  images: string[]
-  status: ReportStatus
-  priority: Priority
-  estimatedVolume: number
-  notes?: string
-  createdAt: string
-  updatedAt: string
-  assignedCollectorId?: string
-  scheduledPickupDate?: string
-  completedAt?: string
+      lat: number;
+      lng: number;
+    };
+  };
+  images: string[];
+  status: ReportStatus;
+  priority: Priority;
+  estimatedVolume: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedCollectorId?: string;
+  scheduledPickupDate?: string;
+  completedAt?: string;
 }
 
-export type WasteType = 
+export type WasteType =
   | 'household'
   | 'electronic'
   | 'hazardous'
   | 'organic'
   | 'recyclable'
   | 'construction'
-  | 'other'
+  | 'other';
 
-export type ReportStatus = 
+export type ReportStatus =
   | 'pending'
   | 'assigned'
   | 'in_progress'
   | 'completed'
-  | 'cancelled'
+  | 'cancelled';
 
-export type Priority = 'low' | 'medium' | 'high' | 'urgent'
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface CreateReportData {
-  type: WasteType
-  description: string
+  type: WasteType;
+  description: string;
   location: {
-    address: string
+    address: string;
     coordinates: {
-      lat: number
-      lng: number
-    }
-  }
-  images: File[]
-  estimatedVolume: number
-  notes?: string
+      lat: number;
+      lng: number;
+    };
+  };
+  images: File[];
+  estimatedVolume: number;
+  notes?: string;
 }
 
 export interface ReportFilters {
-  status?: ReportStatus[]
-  type?: WasteType[]
-  priority?: Priority[]
+  status?: ReportStatus[];
+  type?: WasteType[];
+  priority?: Priority[];
   dateRange?: {
-    start: string
-    end: string
-  }
+    start: string;
+    end: string;
+  };
 }
