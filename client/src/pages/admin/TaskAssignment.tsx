@@ -94,11 +94,11 @@ const TaskAssignment: React.FC = () => {
         setReports([])
         setTotalPages(1)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast({
         type: 'error',
         title: 'Connection Error',
-        message: error?.message || 'Unable to connect to server. Please check your connection.'
+        message: error instanceof Error ? error.message : 'Unable to connect to server. Please check your connection.'
       })
       setReports([])
       setTotalPages(1)
@@ -111,11 +111,11 @@ const TaskAssignment: React.FC = () => {
       const response = await axiosInstance.get('/admin/collectors')
       const data = response.data
       setCollectors(data?.data || [])
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast({
         type: 'error',
         title: 'Error',
-        message: error?.message || 'Failed to load collectors'
+        message: error instanceof Error ? error.message : 'Failed to load collectors'
       })
       setCollectors([])
     }
@@ -170,11 +170,11 @@ const TaskAssignment: React.FC = () => {
       setShowAssignmentModal(false)
       setSelectedReport(null)
       fetchPendingReports() // Refresh the list
-    } catch (error: any) {
+    } catch (error: unknown) {
       showToast({
         type: 'error',
         title: 'Error',
-        message: error?.message || 'Failed to assign collector'
+        message: error instanceof Error ? error.message : 'Failed to assign collector'
       })
     } finally {
       setAssigning(null)
