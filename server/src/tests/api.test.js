@@ -42,10 +42,18 @@ describe('Wastewise API Tests', () => {
       if (mongoose.connection.readyState === 1) {
         await mongoose.connection.db.dropDatabase()
       }
-    } catch (_) {}
+    } catch (err) {
+      if (process.env.DEBUG) {
+        console.warn('dropDatabase cleanup error:', err)
+      }
+    }
     try {
       await mongoose.connection.close()
-    } catch (_) {}
+    } catch (err) {
+      if (process.env.DEBUG) {
+        console.warn('mongoose close error:', err)
+      }
+    }
     if (mongoServer) {
       await mongoServer.stop()
     }
